@@ -2,7 +2,7 @@ package com.folta.todoapp.data.local
 
 import androidx.room.*
 
-@Database(entities = [ToDo::class], version = 1)
+@Database(entities = [ToDo::class], version = 2)
 abstract class MyDataBase : RoomDatabase() {
     abstract fun todoDAO(): ToDoDAO
 }
@@ -13,7 +13,8 @@ data class ToDo(
     val id: Int,
     val isChecked: Boolean,
     val title: String,
-    val content: String
+    val content: String,
+    val createdAt: String
 )
 
 @Dao
@@ -22,8 +23,10 @@ interface ToDoDAO {
     suspend fun add(todo: ToDo)
 
     @Query("Select * from ToDo")
-//    suspend fun getAll(): LiveData<List<ToDo>>
     suspend fun getAll(): List<ToDo>
+
+    @Query("Select * from ToDo where createdAt = :dateyyyyMMDD ")
+    suspend fun findByDate(dateyyyyMMDD: String): List<ToDo>
 
     @Update
     suspend fun update(todo: ToDo)
@@ -31,4 +34,3 @@ interface ToDoDAO {
     @Delete
     suspend fun delete(todo: ToDo)
 }
-
