@@ -1,7 +1,5 @@
 package com.folta.todoapp.view
 
-import android.content.res.Resources
-import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,7 +20,7 @@ open class ToDoAdapter(var items: List<ToDo>) : RecyclerView.Adapter<ToDoAdapter
         holder.title.setText(items[pos].id.toString())
 //      本文は改行削除＋入らない部分は非表示にする
         if (items[pos].content.length > 20) {
-            holder.content.text = items[pos].content.replace("\n", " ").substring(0..20)
+            holder.content.setText(items[pos].content.replace("\n", " ").substring(0..20))
         }
         holder.isDone.isChecked = items[pos].isChecked
     }
@@ -40,15 +38,21 @@ open class ToDoAdapter(var items: List<ToDo>) : RecyclerView.Adapter<ToDoAdapter
 
     private fun onDetailClick(holder: ToDoViewHolder, pos: Int) {
 //        contentを全文表示する
-        holder.content.text = items[pos].content
+        holder.content.setText(items[pos].content)
+        holder.content.isEnabled = true
+        holder.content.isFocusable = true
+        holder.content.isFocusableInTouchMode = true
         holder.detail.setImageResource(R.drawable.ic_detail_selected)
     }
 
     private fun onFocusOut(holder: ToDoViewHolder, pos: Int) {
 //      本文は改行削除＋入らない部分は非表示にする
         if (items[pos].content.length > 20) {
-            holder.content.text = items[pos].content.replace("\n", " ").substring(0..20)
+            holder.content.setText(items[pos].content.replace("\n", " ").substring(0..20))
         }
+        holder.content.isEnabled = false
+        holder.content.isFocusable = false
+        holder.content.isFocusableInTouchMode = false
         holder.detail.setImageResource(R.drawable.ic_detail)
     }
 
@@ -69,7 +73,7 @@ open class ToDoAdapter(var items: List<ToDo>) : RecyclerView.Adapter<ToDoAdapter
             getSystemService(itemView.context, InputMethodManager::class.java)
         private val linearLayout:LinearLayout = itemView.linearLayout
         val title: EditText = itemView.title
-        val content: TextView = itemView.content
+        val content: EditText = itemView.content
         val isDone: CheckBox = itemView.isDone
         val detail:ImageButton = itemView.detail
         private var isShowDetail = false
