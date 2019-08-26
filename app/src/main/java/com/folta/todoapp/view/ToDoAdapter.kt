@@ -11,6 +11,7 @@ import com.folta.todoapp.R
 import com.folta.todoapp.data.local.ToDo
 import kotlinx.android.synthetic.main.holder_todo.view.*
 import androidx.core.content.ContextCompat.getSystemService
+import androidx.core.view.setPadding
 import com.folta.todoapp.Logger
 
 
@@ -36,12 +37,15 @@ open class ToDoAdapter(var items: List<ToDo>) : RecyclerView.Adapter<ToDoAdapter
         return items.size
     }
 
-    private fun onDetailClick(holder: ToDoViewHolder, pos: Int) {
+    private fun onDetailClick(holder: ToDoViewHolder, pos: Int, dpRate: Int) {
 //        contentを全文表示する
         holder.content.setText(items[pos].content)
         holder.content.isEnabled = true
         holder.content.isFocusable = true
         holder.content.isFocusableInTouchMode = true
+        holder.content.setBackgroundResource(R.drawable.edittext_content)
+        val dp = 12 * dpRate
+        holder.content.setPadding(dp, dp, dp, 18 * dpRate)
         holder.detail.setImageResource(R.drawable.ic_detail_selected)
     }
 
@@ -53,6 +57,7 @@ open class ToDoAdapter(var items: List<ToDo>) : RecyclerView.Adapter<ToDoAdapter
         holder.content.isEnabled = false
         holder.content.isFocusable = false
         holder.content.isFocusableInTouchMode = false
+        holder.content.background = null
         holder.detail.setImageResource(R.drawable.ic_detail)
     }
 
@@ -71,11 +76,11 @@ open class ToDoAdapter(var items: List<ToDo>) : RecyclerView.Adapter<ToDoAdapter
         RecyclerView.ViewHolder(itemView) {
         private val inputMethodManager =
             getSystemService(itemView.context, InputMethodManager::class.java)
-        private val linearLayout:LinearLayout = itemView.linearLayout
+        private val linearLayout: LinearLayout = itemView.linearLayout
         val title: EditText = itemView.title
         val content: EditText = itemView.content
         val isDone: CheckBox = itemView.isDone
-        val detail:ImageButton = itemView.detail
+        val detail: ImageButton = itemView.detail
         private var isShowDetail = false
 
         init {
@@ -102,10 +107,12 @@ open class ToDoAdapter(var items: List<ToDo>) : RecyclerView.Adapter<ToDoAdapter
             }
             itemView.detail.setOnClickListener { v ->
                 Logger.d(isShowDetail.toString())
-                if (isShowDetail){
+//                val dpRate = v.context.resources.getDimensionPixelSize(R.dimen.your_dimension_name)
+                if (isShowDetail) {
                     adapter.onFocusOut(this, this.adapterPosition)
-                }else{
-                    adapter.onDetailClick(this,this.adapterPosition)
+                } else {
+//                    TODO()
+                    adapter.onDetailClick(this, this.adapterPosition,1)
                 }
                 inputMethodManager?.hideSoftInputFromWindow(v.windowToken, 0)
                 isShowDetail = !isShowDetail

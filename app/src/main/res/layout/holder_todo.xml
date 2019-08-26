@@ -33,23 +33,25 @@
                 app:layout_constraintStart_toEndOf="@+id/isDone"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:layout_conversion_wrapHeight="50" tools:layout_conversion_wrapWidth="1038"/>
+
         <EditText
                 android:id="@+id/content"
-                style="@style/Widget.MaterialComponents.TextInputEditText.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:background="@drawable/edittext_content"
+                android:background="#00000000"
                 android:enabled="false"
                 android:focusable="false"
                 android:focusableInTouchMode="false"
                 android:inputType="textMultiLine"
-                android:paddingTop="12dp"
-                android:paddingBottom="18dp"
+
                 android:text="text\ncontent"
-                android:textColor="#999999" android:textSize="12sp"
-                app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toBottomOf="@+id/isDone"
-                tools:layout_conversion_wrapHeight="43" tools:layout_conversion_wrapWidth="1038"/>
+                android:textColor="#999999"
+                android:textSize="12sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/isDone"
+                tools:layout_conversion_wrapHeight="43"
+                tools:layout_conversion_wrapWidth="1038" />
 
         <ImageButton
                 android:id="@+id/detail"
