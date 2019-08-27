@@ -19,35 +19,36 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
         />
+
         <EditText
                 android:id="@+id/title"
                 android:layout_width="wrap_content"
-                android:layout_height="0dp"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:layout_marginTop="4dp"
                 android:background="#00000000"
                 android:focusable="false"
                 android:inputType="text"
                 android:text="todoTitle"
                 android:textSize="20sp"
+                app:layout_constraintBottom_toBottomOf="@+id/isDone"
                 app:layout_constraintStart_toEndOf="@+id/isDone"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:layout_conversion_wrapHeight="50" tools:layout_conversion_wrapWidth="1038"/>
+                app:layout_constraintTop_toTopOf="@+id/isDone"
+                tools:layout_conversion_wrapHeight="50"
+                tools:layout_conversion_wrapWidth="1038" />
 
         <EditText
                 android:id="@+id/content"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
                 android:background="#00000000"
                 android:enabled="false"
                 android:focusable="false"
                 android:focusableInTouchMode="false"
                 android:inputType="textMultiLine"
 
-                android:text="text\ncontent"
+                android:text="content"
                 android:textColor="#999999"
-                android:textSize="12sp"
+                android:textSize="10sp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/isDone"
                 tools:layout_conversion_wrapHeight="43"

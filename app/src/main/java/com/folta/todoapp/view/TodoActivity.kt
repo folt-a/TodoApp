@@ -17,9 +17,15 @@ class TodoActivity : AppCompatActivity(), ToDoListFragment.OnFragmentInteraction
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Logger.init()
+        init()
         setContentView(R.layout.activity_todo)
 //        setSupportActionBar(toolbar)
+    }
+
+    private fun init(){
+        //        起動初期処理
+        Logger.init()
+
     }
 
 //    override fun onCreateOptionsMenu(menu: Menu): Boolean {
