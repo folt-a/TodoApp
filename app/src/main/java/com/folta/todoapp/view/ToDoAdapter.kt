@@ -88,6 +88,11 @@ open class ToDoAdapter(var items: List<ToDo>) : RecyclerView.Adapter<ToDoAdapter
             }
             itemView.title.setOnFocusChangeListener { v, hasFocus ->
                 if (hasFocus) return@setOnFocusChangeListener
+                inputMethodManager?.hideSoftInputFromWindow(v.windowToken, 0)
+            }
+
+            itemView.detail.setOnFocusChangeListener { v, hasFocus ->
+                if (hasFocus) return@setOnFocusChangeListener
                 this.content.isEnabled = false
                 this.content.isFocusable = false
                 this.content.isFocusableInTouchMode = false

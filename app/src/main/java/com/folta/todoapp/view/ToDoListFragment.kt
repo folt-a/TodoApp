@@ -69,6 +69,9 @@ class ToDoListFragment : Fragment() {
         )
 
         fab.setOnClickListener {
+            val inputMethodManager =
+            ContextCompat.getSystemService(it!!.context, InputMethodManager::class.java)
+            inputMethodManager?.hideSoftInputFromWindow(it.windowToken, 0)
             val orderId: Int
             if (todoAdapter.itemCount != 0) {
                 orderId = viewToDoList.maxBy { toDo -> toDo.orderId }!!.orderId + 1
