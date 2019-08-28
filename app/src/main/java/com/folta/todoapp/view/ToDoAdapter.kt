@@ -42,7 +42,7 @@ open class ToDoAdapter(var items: List<ToDo>) : RecyclerView.Adapter<ToDoAdapter
         return items.size
     }
 
-    private fun onDetailClick(holder: ToDoViewHolder, pos: Int, dpRate: Int) {
+    private fun onDetailClick(holder: ToDoViewHolder, pos: Int) {
 //        contentを全文表示する
         holder.content.setText(items[pos].content)
     }
@@ -115,7 +115,7 @@ open class ToDoAdapter(var items: List<ToDo>) : RecyclerView.Adapter<ToDoAdapter
                     if (mlp is ViewGroup.MarginLayoutParams) mlp.setMargins(0)
                     detail.setImageResource(R.drawable.ic_detail)
                 } else {
-                    adapter.onDetailClick(this, this.adapterPosition, 1)
+                    adapter.onDetailClick(this, this.adapterPosition)
                     this.content.setBackgroundResource(R.drawable.edittext_content)
                     this.content.setPadding(
                         v.context.resources.getDimensionPixelSize(R.dimen.dp8),
