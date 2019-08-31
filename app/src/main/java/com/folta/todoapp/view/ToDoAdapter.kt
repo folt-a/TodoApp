@@ -57,6 +57,10 @@ open class ToDoAdapter(var items: List<ToDo>) : RecyclerView.Adapter<ToDoAdapter
             if (onTitleFocusChange(v, hasFocus, holder)) return@setOnFocusChangeListener
         }
 
+        holder.itemView.content.setOnClickListener { v ->
+            onContentClick(v, holder)
+        }
+
         holder.itemView.content.setOnFocusChangeListener { v, hasFocus ->
             if (onContentFocusChange(v, hasFocus, holder)) return@setOnFocusChangeListener
         }
@@ -71,8 +75,15 @@ open class ToDoAdapter(var items: List<ToDo>) : RecyclerView.Adapter<ToDoAdapter
         return holder
     }
 
+    open fun onContentClick(v: View?, holder: ToDoViewHolder) {
+    }
+
     override fun getItemCount(): Int {
         return items.size
+    }
+
+    override fun getItemId(position: Int): Long {
+        return items[position].id.toLong()
     }
 
     internal fun getEditedToDo(holder: ToDoViewHolder): ToDo? {

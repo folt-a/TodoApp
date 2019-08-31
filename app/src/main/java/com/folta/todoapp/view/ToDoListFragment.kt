@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
@@ -54,10 +55,20 @@ class ToDoListFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_todo_list, container, false)
     }
 
+    @SuppressLint("RestrictedApi")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        recycleView.setHasFixedSize(true)
+//        recycleView.setHasFixedSize(true)
         recycleView.layoutManager = LinearLayoutManager(this.context)
+        recycleView.setOnTouchListener { v, event ->
+            Logger.d(event.action.toString())
+            if (event.action == MotionEvent.ACTION_DOWN) {
+                ContextCompat.getSystemService(v.context, InputMethodManager::class.java)
+                    ?.hideSoftInputFromWindow(v?.windowToken, 0)
+                toolbar.requestFocus()
+            }
+            return@setOnTouchListener false
+        }
 
         CoroutineScope(Dispatchers.Main + job).launch {
             repository = ToDoRepositoryLocal(view.context)
@@ -69,6 +80,7 @@ class ToDoListFragment : Fragment() {
                         holder.title.requestFocus()
                     } else {
                         holder.linearLayout.requestFocus()
+                        fab.visibility = View.VISIBLE
                         holder.inputMethodManager?.hideSoftInputFromWindow(v?.windowToken, 0)
                     }
                 }
@@ -84,6 +96,7 @@ class ToDoListFragment : Fragment() {
                     holder.title.isFocusable = true
                     holder.title.isFocusableInTouchMode = true
                     holder.title.requestFocus()
+                    fab.visibility = View.GONE
                     holder.inputMethodManager?.showSoftInput(v, 1)
                 }
 
@@ -92,13 +105,17 @@ class ToDoListFragment : Fragment() {
                     hasFocus: Boolean,
                     holder: ToDoViewHolder
                 ): Boolean {
-                    if (hasFocus) return true
-                    val todo = getEditedToDo(holder)
-                    CoroutineScope(Dispatchers.Main + job).launch {
-                        if (todo != null) repository.save(todo)
+                    if (hasFocus) {
+                        return holder.title.performClick()
+                    } else {
+                        val todo = getEditedToDo(holder)
+                        CoroutineScope(Dispatchers.Main + job).launch {
+                            if (todo != null) repository.save(todo)
+                        }
+                        fab.visibility = View.VISIBLE
+                        holder.inputMethodManager?.hideSoftInputFromWindow(v?.windowToken, 0)
+                        return true
                     }
-                    holder.inputMethodManager?.hideSoftInputFromWindow(v?.windowToken, 0)
-                    return false
                 }
 
                 override fun onTitleEditorAction(
@@ -110,6 +127,7 @@ class ToDoListFragment : Fragment() {
                         EditorInfo.IME_ACTION_DONE -> {
                             holder.title.isFocusable = false
                             holder.title.isFocusableInTouchMode = false
+                            fab.visibility = View.VISIBLE
                             holder.inputMethodManager?.hideSoftInputFromWindow(v?.windowToken, 0)
                             return true
                         }
@@ -145,28 +163,25 @@ class ToDoListFragment : Fragment() {
                     }
                     holder.detail.setImageResource(R.drawable.ic_detail_selected)
                     holder.content.visibility = View.VISIBLE
-                    holder.content.isEnabled = !holder.content.isEnabled
-                    holder.content.isFocusable = !holder.content.isFocusable
-                    holder.content.isFocusableInTouchMode = !holder.content.isFocusableInTouchMode
-
+                    holder.content.isEnabled = true
+                    holder.content.isFocusable = true
+                    holder.content.isFocusableInTouchMode = true
+                    fab.visibility = View.VISIBLE
                     holder.inputMethodManager?.hideSoftInputFromWindow(v?.windowToken, 0)
                     holder.isShowDetail = !holder.isShowDetail
                 }
 
-                @SuppressLint("SetTextI18n")
                 override fun closeContentDetail(v: View?, holder: ToDoViewHolder) {
                     Logger.d("closeContentDetail")
+                    onContentFocusChange(v, false, holder)
 //      本文は改行削除＋入らない部分は非表示にする
                     val pos = holder.adapterPosition
                     if (items[pos].content.length > 20) {
-                        holder.content.setText(
-                            "${items[pos].content.replace(
-                                "\n",
-                                " "
-                            ).substring(0..20)}..."
-                        )
                         holder.content.visibility = View.VISIBLE
+                        val text = items[pos].content.replace("\n", " ").substring(0..20) + "..."
+                        holder.content.setText(text)
                     } else if (items[pos].content.isEmpty()) {
+                        Logger.d("empty")
                         holder.content.visibility = View.GONE
                     } else {
                         holder.content.visibility = View.VISIBLE
@@ -185,12 +200,18 @@ class ToDoListFragment : Fragment() {
                     if (mlp is ViewGroup.MarginLayoutParams) mlp.setMargins(0)
                     holder.detail.setImageResource(R.drawable.ic_detail)
 
-                    holder.content.isEnabled = !holder.content.isEnabled
-                    holder.content.isFocusable = !holder.content.isFocusable
-                    holder.content.isFocusableInTouchMode = !holder.content.isFocusableInTouchMode
-
+                    holder.content.isEnabled = false
+                    holder.content.isFocusable = false
+                    holder.content.isFocusableInTouchMode = false
+                    fab.visibility = View.VISIBLE
                     holder.inputMethodManager?.hideSoftInputFromWindow(v?.windowToken, 0)
                     holder.isShowDetail = !holder.isShowDetail
+                }
+
+                override fun onContentClick(v: View?, holder: ToDoViewHolder) {
+                    Logger.d("onContentClick")
+                    fab.visibility = View.GONE
+                    holder.inputMethodManager?.showSoftInput(v, 1)
                 }
 
                 override fun onContentFocusChange(
@@ -198,16 +219,21 @@ class ToDoListFragment : Fragment() {
                     hasFocus: Boolean,
                     holder: ToDoViewHolder
                 ): Boolean {
-                    Logger.d("onContentFocusChange")
-                    if (hasFocus) return true
-                    val todo = getEditedToDo(holder)
-                    CoroutineScope(Dispatchers.Main + job).launch {
-                        if (todo != null) repository.save(todo)
+                    if (hasFocus) {
+                        return holder.content.performClick()
+                    } else {
+                        Logger.d("onContentFocusChange : " + hasFocus.toString())
+                        val todo = getEditedToDo(holder)
+                        CoroutineScope(Dispatchers.Main + job).launch {
+                            if (todo != null) repository.save(todo)
+                        }
+                        fab.visibility = View.VISIBLE
+                        holder.inputMethodManager?.hideSoftInputFromWindow(v?.windowToken, 0)
+                        return true
                     }
-                    holder.inputMethodManager?.hideSoftInputFromWindow(v?.windowToken, 0)
-                    return false
                 }
             }
+            todoAdapter.setHasStableIds(true)
             recycleView.adapter = todoAdapter
             todoAdapter.notifyDataSetChanged()
         }
@@ -244,19 +270,13 @@ class ToDoListFragment : Fragment() {
                 val savedToDo = repository.find(savedId)
                 viewToDoList.add(savedToDo)
                 todoAdapter.notifyItemInserted(todoAdapter.itemCount - 1)
-                todoAdapter.notifyDataSetChanged()
-//                val addedHolder= recycleView.findViewHolderForAdapterPosition(todoAdapter.itemCount - 1)
-                val addedHolder = recycleView.findViewHolderForAdapterPosition(1)
-                Logger.d("addedHolder" + (addedHolder as? ToDoAdapter.ToDoViewHolder)?.title)
-//                Logger.d("addedHolder" + recycleView.findViewHolderForAdapterPosition(todoAdapter.itemCount - 1).toString())
-//                (addedHolder as? ToDoAdapter.ToDoViewHolder)?.title?.requestFocus()
-
             }
         }
 
         toolbar.setOnTouchListener { v, _ ->
             val inputMethodManager =
                 ContextCompat.getSystemService(v!!.context, InputMethodManager::class.java)
+            fab.visibility = View.VISIBLE
             inputMethodManager?.hideSoftInputFromWindow(v.windowToken, 0)
             toolbar.requestFocus()
         }
