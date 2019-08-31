@@ -2,7 +2,7 @@ package com.folta.todoapp.data.local
 
 import androidx.room.*
 
-@Database(entities = [ToDo::class], version = 1)
+@Database(entities = [ToDo::class], version = 3)
 abstract class MyDataBase : RoomDatabase() {
     abstract fun todoDAO(): ToDoDAO
 }
@@ -11,9 +11,11 @@ abstract class MyDataBase : RoomDatabase() {
 data class ToDo(
     @PrimaryKey(autoGenerate = true)
     val id: Int,
-    val isChecked: Boolean,
-    val title: String,
-    val content: String
+    var orderId: Int,
+    var isChecked: Boolean,
+    var title: String,
+    var content: String,
+    val createdAt: String
 )
 
 @Dao
@@ -21,14 +23,31 @@ interface ToDoDAO {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun add(todo: ToDo)
 
-    @Query("Select * from ToDo")
-//    suspend fun getAll(): LiveData<List<ToDo>>
+    @Query("select * from ToDo order by orderId")
     suspend fun getAll(): List<ToDo>
+
+    @Query("select * from ToDo where id = :id")
+    suspend fun findById(id: Int): ToDo
+
+    @Query("select max(id) from ToDo")
+    suspend fun getNewestId(): Int
+
+    @Query("select * from ToDo where createdAt = :dateyyyyMMDD order by orderId")
+    suspend fun findByDate(dateyyyyMMDD: String): List<ToDo>
 
     @Update
     suspend fun update(todo: ToDo)
 
-    @Delete
-    suspend fun delete(todo: ToDo)
-}
+    @Transaction
+    suspend fun updateViewSort(todos: Iterable<ToDo>) {
+        for (todo in todos) {
+            updateOrderId(todo.id, todo.orderId)
+        }
+    }
 
+    @Query("update ToDo set orderId = :orderId where id = :id")
+    suspend fun updateOrderId(id: Int, orderId: Int)
+
+    @Query("delete from ToDo where id = :id")
+    suspend fun delete(id: Int)
+}
