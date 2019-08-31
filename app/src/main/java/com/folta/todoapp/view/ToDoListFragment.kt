@@ -1,13 +1,19 @@
 package com.folta.todoapp.view
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
+import android.widget.CompoundButton
+import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.core.view.setMargins
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -19,6 +25,7 @@ import com.folta.todoapp.data.local.ToDo
 import com.folta.todoapp.data.local.ToDoRepository
 import com.folta.todoapp.data.local.ToDoRepositoryLocal
 import kotlinx.android.synthetic.main.fragment_todo_list.*
+import kotlinx.android.synthetic.main.holder_todo.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -55,7 +62,152 @@ class ToDoListFragment : Fragment() {
         CoroutineScope(Dispatchers.Main + job).launch {
             repository = ToDoRepositoryLocal(view.context)
             viewToDoList = repository.findByDate("").toMutableList()
-            todoAdapter = ToDoAdapter(viewToDoList)
+
+            todoAdapter = object : ToDoAdapter(viewToDoList) {
+                override fun onClick(v: View?, holder: ToDoViewHolder) {
+                    if (holder.isShowDetail) {
+                        holder.title.requestFocus()
+                    } else {
+                        holder.linearLayout.requestFocus()
+                        holder.inputMethodManager?.hideSoftInputFromWindow(v?.windowToken, 0)
+                    }
+                }
+
+                override fun onDoneCheck(v: CompoundButton?, holder: ToDoViewHolder) {
+                    val todo = getEditedToDo(holder)
+                    CoroutineScope(Dispatchers.Main + job).launch {
+                        if (todo != null) repository.save(todo)
+                    }
+                }
+
+                override fun onTitleClick(v: View?, holder: ToDoViewHolder) {
+                    holder.title.isFocusable = true
+                    holder.title.isFocusableInTouchMode = true
+                    holder.title.requestFocus()
+                    holder.inputMethodManager?.showSoftInput(v, 1)
+                }
+
+                override fun onTitleFocusChange(
+                    v: View?,
+                    hasFocus: Boolean,
+                    holder: ToDoViewHolder
+                ): Boolean {
+                    if (hasFocus) return true
+                    val todo = getEditedToDo(holder)
+                    CoroutineScope(Dispatchers.Main + job).launch {
+                        if (todo != null) repository.save(todo)
+                    }
+                    holder.inputMethodManager?.hideSoftInputFromWindow(v?.windowToken, 0)
+                    return false
+                }
+
+                override fun onTitleEditorAction(
+                    v: TextView?,
+                    actionId: Int,
+                    holder: ToDoViewHolder
+                ): Boolean {
+                    when (actionId) {
+                        EditorInfo.IME_ACTION_DONE -> {
+                            holder.title.isFocusable = false
+                            holder.title.isFocusableInTouchMode = false
+                            holder.inputMethodManager?.hideSoftInputFromWindow(v?.windowToken, 0)
+                            return true
+                        }
+                        else -> {
+                            return false
+                        }
+                    }
+                }
+
+                override fun showContentDetail(v: View?, holder: ToDoViewHolder) {
+                    //        contentを全文表示する
+                    holder.content.setText(items[holder.adapterPosition].content)
+                    holder.content.setBackgroundResource(R.drawable.edittext_content)
+                    v?.let {
+                        holder.content.setPadding(
+                            v.context.resources.getDimensionPixelSize(R.dimen.dp8),
+                            v.context.resources.getDimensionPixelSize(R.dimen.dp8),
+                            v.context.resources.getDimensionPixelSize(R.dimen.dp8),
+                            v.context.resources.getDimensionPixelSize(R.dimen.dp8)
+                        )
+                    }
+                    holder.content.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+                    val mlp = holder.itemView.content.layoutParams
+                    if (mlp is ViewGroup.MarginLayoutParams) {
+                        v?.let {
+                            mlp.setMargins(
+                                0,
+                                v.context.resources.getDimensionPixelSize(R.dimen.dp8),
+                                0,
+                                0
+                            )
+                        }
+                    }
+                    holder.detail.setImageResource(R.drawable.ic_detail_selected)
+                    holder.content.visibility = View.VISIBLE
+                    holder.content.isEnabled = !holder.content.isEnabled
+                    holder.content.isFocusable = !holder.content.isFocusable
+                    holder.content.isFocusableInTouchMode = !holder.content.isFocusableInTouchMode
+
+                    holder.inputMethodManager?.hideSoftInputFromWindow(v?.windowToken, 0)
+                    holder.isShowDetail = !holder.isShowDetail
+                }
+
+                @SuppressLint("SetTextI18n")
+                override fun closeContentDetail(v: View?, holder: ToDoViewHolder) {
+                    Logger.d("closeContentDetail")
+//      本文は改行削除＋入らない部分は非表示にする
+                    val pos = holder.adapterPosition
+                    if (items[pos].content.length > 20) {
+                        holder.content.setText(
+                            "${items[pos].content.replace(
+                                "\n",
+                                " "
+                            ).substring(0..20)}..."
+                        )
+                        holder.content.visibility = View.VISIBLE
+                    } else if (items[pos].content.isEmpty()) {
+                        holder.content.visibility = View.GONE
+                    } else {
+                        holder.content.visibility = View.VISIBLE
+                        holder.content.setText(items[pos].content)
+                    }
+
+                    holder.content.background = null
+                    holder.content.setPadding(
+                        0,
+                        0,
+                        0,
+                        0
+                    )
+                    holder.content.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10f)
+                    val mlp = holder.content.layoutParams
+                    if (mlp is ViewGroup.MarginLayoutParams) mlp.setMargins(0)
+                    holder.detail.setImageResource(R.drawable.ic_detail)
+
+                    holder.content.isEnabled = !holder.content.isEnabled
+                    holder.content.isFocusable = !holder.content.isFocusable
+                    holder.content.isFocusableInTouchMode = !holder.content.isFocusableInTouchMode
+
+                    holder.inputMethodManager?.hideSoftInputFromWindow(v?.windowToken, 0)
+                    holder.isShowDetail = !holder.isShowDetail
+                }
+
+                override fun onContentFocusChange(
+                    v: View?,
+                    hasFocus: Boolean,
+                    holder: ToDoViewHolder
+                ): Boolean {
+                    Logger.d("onContentFocusChange")
+                    if (hasFocus) return true
+                    val todo = getEditedToDo(holder)
+                    CoroutineScope(Dispatchers.Main + job).launch {
+                        if (todo != null) repository.save(todo)
+                    }
+                    holder.inputMethodManager?.hideSoftInputFromWindow(v?.windowToken, 0)
+                    return false
+                }
+            }
             recycleView.adapter = todoAdapter
             todoAdapter.notifyDataSetChanged()
         }
@@ -70,7 +222,7 @@ class ToDoListFragment : Fragment() {
 
         fab.setOnClickListener {
             val inputMethodManager =
-            ContextCompat.getSystemService(it!!.context, InputMethodManager::class.java)
+                ContextCompat.getSystemService(it!!.context, InputMethodManager::class.java)
             inputMethodManager?.hideSoftInputFromWindow(it.windowToken, 0)
             val orderId: Int
             if (todoAdapter.itemCount != 0) {
@@ -82,8 +234,8 @@ class ToDoListFragment : Fragment() {
                 ToDo(
                     id = 0,
                     isChecked = false,
-                    content = "ああああああああああああ\nbbbbbbb\nえええええccccccccccccccccc",
-                    title = "titleView",
+                    content = "",
+                    title = "",
                     createdAt = "",
                     orderId = orderId
                 )
@@ -92,6 +244,13 @@ class ToDoListFragment : Fragment() {
                 val savedToDo = repository.find(savedId)
                 viewToDoList.add(savedToDo)
                 todoAdapter.notifyItemInserted(todoAdapter.itemCount - 1)
+                todoAdapter.notifyDataSetChanged()
+//                val addedHolder= recycleView.findViewHolderForAdapterPosition(todoAdapter.itemCount - 1)
+                val addedHolder = recycleView.findViewHolderForAdapterPosition(1)
+                Logger.d("addedHolder" + (addedHolder as? ToDoAdapter.ToDoViewHolder)?.title)
+//                Logger.d("addedHolder" + recycleView.findViewHolderForAdapterPosition(todoAdapter.itemCount - 1).toString())
+//                (addedHolder as? ToDoAdapter.ToDoViewHolder)?.title?.requestFocus()
+
             }
         }
 
@@ -113,15 +272,11 @@ class ToDoListFragment : Fragment() {
                     viewHolder: RecyclerView.ViewHolder,
                     target: RecyclerView.ViewHolder
                 ): Boolean {
-                    val fromPosition = viewHolder?.adapterPosition ?: 0
-                    val toPosition = target?.adapterPosition ?: 0
+                    val fromPosition = viewHolder.adapterPosition
+                    val toPosition = target.adapterPosition
 
                     viewToDoList.add(toPosition, viewToDoList.removeAt(fromPosition))
                     todoAdapter.notifyItemMoved(fromPosition, toPosition)
-                    Logger.d("  ")
-                    for (i in viewToDoList) {
-                        Logger.d("id:" + i.id + " oId:" + i.orderId)
-                    }
                     return true
                 }
 
