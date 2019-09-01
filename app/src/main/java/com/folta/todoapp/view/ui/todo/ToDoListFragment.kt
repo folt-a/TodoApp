@@ -1,4 +1,4 @@
-package com.folta.todoapp.view
+package com.folta.todoapp.view.ui.todo
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -58,14 +58,14 @@ class ToDoListFragment : Fragment() {
     @SuppressLint("RestrictedApi")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-//        recycleView.setHasFixedSize(true)
+        recycleView.setHasFixedSize(true)
         recycleView.layoutManager = LinearLayoutManager(this.context)
         recycleView.setOnTouchListener { v, event ->
-            Logger.d(event.action.toString())
+//            Logger.d(event.action.toString())
             if (event.action == MotionEvent.ACTION_DOWN) {
                 ContextCompat.getSystemService(v.context, InputMethodManager::class.java)
                     ?.hideSoftInputFromWindow(v?.windowToken, 0)
-                toolbar.requestFocus()
+                coordinatorLayout.requestFocus()
             }
             return@setOnTouchListener false
         }
@@ -176,6 +176,7 @@ class ToDoListFragment : Fragment() {
                     onContentFocusChange(v, false, holder)
 //      本文は改行削除＋入らない部分は非表示にする
                     val pos = holder.adapterPosition
+                    holder.contentText = items[pos].content
                     if (items[pos].content.length > 20) {
                         holder.content.visibility = View.VISIBLE
                         val text = items[pos].content.replace("\n", " ").substring(0..20) + "..."
@@ -204,6 +205,7 @@ class ToDoListFragment : Fragment() {
                     holder.content.isFocusable = false
                     holder.content.isFocusableInTouchMode = false
                     fab.visibility = View.VISIBLE
+                    holder.fix.visibility = View.GONE
                     holder.inputMethodManager?.hideSoftInputFromWindow(v?.windowToken, 0)
                     holder.isShowDetail = !holder.isShowDetail
                 }
@@ -211,6 +213,7 @@ class ToDoListFragment : Fragment() {
                 override fun onContentClick(v: View?, holder: ToDoViewHolder) {
                     Logger.d("onContentClick")
                     fab.visibility = View.GONE
+                    holder.fix.visibility = View.VISIBLE
                     holder.inputMethodManager?.showSoftInput(v, 1)
                 }
 
@@ -222,7 +225,9 @@ class ToDoListFragment : Fragment() {
                     if (hasFocus) {
                         return holder.content.performClick()
                     } else {
-                        Logger.d("onContentFocusChange : " + hasFocus.toString())
+                        holder.contentText = holder.content.text.toString()
+                        Logger.d("onContentFocusChange : $hasFocus")
+                        holder.fix.visibility = View.GONE
                         val todo = getEditedToDo(holder)
                         CoroutineScope(Dispatchers.Main + job).launch {
                             if (todo != null) repository.save(todo)
@@ -230,6 +235,15 @@ class ToDoListFragment : Fragment() {
                         fab.visibility = View.VISIBLE
                         holder.inputMethodManager?.hideSoftInputFromWindow(v?.windowToken, 0)
                         return true
+                    }
+                }
+
+                override fun onFixClick(v: View?, holder: ToDoViewHolder) {
+                    holder.fix.visibility = View.GONE
+                    holder.linearLayout.requestFocus()
+                    val todo = getEditedToDo(holder)
+                    CoroutineScope(Dispatchers.Main + job).launch {
+                        if (todo != null) repository.save(todo)
                     }
                 }
             }
@@ -273,12 +287,12 @@ class ToDoListFragment : Fragment() {
             }
         }
 
-        toolbar.setOnTouchListener { v, _ ->
+        coordinatorLayout.setOnTouchListener { v, _ ->
             val inputMethodManager =
                 ContextCompat.getSystemService(v!!.context, InputMethodManager::class.java)
             fab.visibility = View.VISIBLE
             inputMethodManager?.hideSoftInputFromWindow(v.windowToken, 0)
-            toolbar.requestFocus()
+            coordinatorLayout.requestFocus()
         }
 
         val getRecyclerViewSimpleCallBack =
