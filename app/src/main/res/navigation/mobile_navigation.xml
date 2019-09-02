@@ -12,10 +12,10 @@
             tools:layout="@layout/fragment_home" />
 
     <fragment
-            android:id="@+id/navigation_dashboard"
+            android:id="@+id/navigation_todo"
             android:name="com.folta.todoapp.view.ui.todo.ToDoListFragment"
             android:label="今日のToDo"
-            tools:layout="@layout/fragment_dashboard" />
+            tools:layout="@layout/fragment_todo_list" />
 
     <fragment
             android:id="@+id/navigation_notifications"

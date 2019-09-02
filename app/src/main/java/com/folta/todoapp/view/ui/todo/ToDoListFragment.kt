@@ -58,6 +58,9 @@ class ToDoListFragment : Fragment() {
     @SuppressLint("RestrictedApi")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        toolbar.title = "2019/09/02"
+
         recycleView.setHasFixedSize(true)
         recycleView.layoutManager = LinearLayoutManager(this.context)
         recycleView.setOnTouchListener { v, event ->
