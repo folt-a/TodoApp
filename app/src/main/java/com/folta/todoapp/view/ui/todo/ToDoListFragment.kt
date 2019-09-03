@@ -5,10 +5,7 @@ import android.content.Context
 import android.net.Uri
 import android.os.Bundle
 import android.util.TypedValue
-import android.view.LayoutInflater
-import android.view.MotionEvent
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.CompoundButton
@@ -48,6 +45,11 @@ class ToDoListFragment : Fragment() {
         arguments?.let {}
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater?.inflate(R.menu.menu_todo, menu)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -58,13 +60,13 @@ class ToDoListFragment : Fragment() {
     @SuppressLint("RestrictedApi")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        toolbar.title = "2019/09/02"
+        setHasOptionsMenu(true)
+//        toolbar.title = "2019/09/02"
 
         recycleView.setHasFixedSize(true)
         recycleView.layoutManager = LinearLayoutManager(this.context)
         recycleView.setOnTouchListener { v, event ->
-//            Logger.d(event.action.toString())
+            //            Logger.d(event.action.toString())
             if (event.action == MotionEvent.ACTION_DOWN) {
                 ContextCompat.getSystemService(v.context, InputMethodManager::class.java)
                     ?.hideSoftInputFromWindow(v?.windowToken, 0)

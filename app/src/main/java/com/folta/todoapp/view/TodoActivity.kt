@@ -11,6 +11,7 @@ import com.folta.todoapp.Logger
 import com.folta.todoapp.R
 import com.folta.todoapp.view.ui.todo.ToDoListFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import kotlinx.android.synthetic.main.activity_todo.*
 
 
 class TodoActivity : AppCompatActivity(), ToDoListFragment.OnFragmentInteractionListener {
@@ -32,14 +33,17 @@ class TodoActivity : AppCompatActivity(), ToDoListFragment.OnFragmentInteraction
             )
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
-        supportActionBar?.hide()
+//        supportActionBar?.hide()
         navView.setupWithNavController(navController)
     }
 
-    private fun init(){
+    private fun init() {
         //        起動初期処理
         Logger.init()
+    }
 
+    fun setActionBarTitle(title: String) {
+        supportActionBar?.title = title
     }
 
 //    override fun onCreateOptionsMenu(menu: Menu): Boolean {
