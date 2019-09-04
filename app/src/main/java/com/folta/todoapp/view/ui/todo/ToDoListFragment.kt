@@ -22,6 +22,7 @@ import com.folta.todoapp.R
 import com.folta.todoapp.data.local.ToDo
 import com.folta.todoapp.data.local.ToDoRepository
 import com.folta.todoapp.data.local.ToDoRepositoryLocal
+import com.folta.todoapp.view.TodoActivity
 import kotlinx.android.synthetic.main.fragment_todo_list.*
 import kotlinx.android.synthetic.main.holder_todo.view.*
 import kotlinx.coroutines.CoroutineScope
@@ -61,7 +62,7 @@ class ToDoListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setHasOptionsMenu(true)
-//        toolbar.title = "2019/09/02"
+        (activity as TodoActivity)?.setActionBarTitle("2019/09/02")
 
         recycleView.setHasFixedSize(true)
         recycleView.layoutManager = LinearLayoutManager(this.context)
