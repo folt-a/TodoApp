@@ -68,19 +68,6 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/ic_detail"/>
 
-        <ImageButton
-                android:id="@+id/fix"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:background="@drawable/imagebutton_fix"
-                android:padding="4dp"
-                android:tint="#fff"
-                android:visibility="gone"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/detail"
-                app:srcCompat="@drawable/ic_check" />
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </LinearLayout>

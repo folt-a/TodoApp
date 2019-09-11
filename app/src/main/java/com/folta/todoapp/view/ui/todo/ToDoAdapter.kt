@@ -27,7 +27,7 @@ open class ToDoAdapter(var items: List<ToDo>) : RecyclerView.Adapter<ToDoAdapter
             holder.content.visibility = View.GONE
         } else {
             holder.content.visibility = View.VISIBLE
-            holder.content.setText(holder.contentText)
+            holder.content.setText(holder.contentText.replace("\n", " "))
         }
         holder.isDone.isChecked = items[pos].isChecked
         Logger.d(holder.contentText)
@@ -72,10 +72,6 @@ open class ToDoAdapter(var items: List<ToDo>) : RecyclerView.Adapter<ToDoAdapter
             } else {
                 showContentDetail(v, holder)
             }
-        }
-
-        holder.itemView.fix.setOnClickListener { v ->
-            onFixClick(v, holder)
         }
 
         return holder
@@ -130,9 +126,6 @@ open class ToDoAdapter(var items: List<ToDo>) : RecyclerView.Adapter<ToDoAdapter
     open fun closeContentDetail(v: View?, holder: ToDoViewHolder) {
     }
 
-    open fun onFixClick(v: View?, holder: ToDoViewHolder) {
-    }
-
     class ToDoViewHolder(itemView: View) :
         RecyclerView.ViewHolder(itemView) {
         val inputMethodManager =
@@ -143,7 +136,6 @@ open class ToDoAdapter(var items: List<ToDo>) : RecyclerView.Adapter<ToDoAdapter
         var contentText: String = ""
         val isDone: CheckBox = itemView.isDone
         val detail: ImageButton = itemView.detail
-        val fix: ImageButton = itemView.fix
         var isShowDetail = false
     }
 }

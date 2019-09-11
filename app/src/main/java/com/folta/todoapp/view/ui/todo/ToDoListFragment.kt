@@ -192,7 +192,8 @@ class ToDoListFragment : Fragment() {
                         holder.content.visibility = View.GONE
                     } else {
                         holder.content.visibility = View.VISIBLE
-                        holder.content.setText(items[pos].content)
+                        val text = items[pos].content.replace("\n", " ")
+                        holder.content.setText(text)
                     }
 
                     holder.content.background = null
@@ -211,7 +212,6 @@ class ToDoListFragment : Fragment() {
                     holder.content.isFocusable = false
                     holder.content.isFocusableInTouchMode = false
                     fab.visibility = View.VISIBLE
-                    holder.fix.visibility = View.GONE
                     holder.inputMethodManager?.hideSoftInputFromWindow(v?.windowToken, 0)
                     holder.isShowDetail = !holder.isShowDetail
                 }
@@ -219,7 +219,6 @@ class ToDoListFragment : Fragment() {
                 override fun onContentClick(v: View?, holder: ToDoViewHolder) {
                     Logger.d("onContentClick")
                     fab.visibility = View.GONE
-                    holder.fix.visibility = View.VISIBLE
                     holder.inputMethodManager?.showSoftInput(v, 1)
                 }
 
@@ -233,7 +232,6 @@ class ToDoListFragment : Fragment() {
                     } else {
                         holder.contentText = holder.content.text.toString()
                         Logger.d("onContentFocusChange : $hasFocus")
-                        holder.fix.visibility = View.GONE
                         val todo = getEditedToDo(holder)
                         CoroutineScope(Dispatchers.Main + job).launch {
                             if (todo != null) repository.save(todo)
@@ -241,15 +239,6 @@ class ToDoListFragment : Fragment() {
                         fab.visibility = View.VISIBLE
                         holder.inputMethodManager?.hideSoftInputFromWindow(v?.windowToken, 0)
                         return true
-                    }
-                }
-
-                override fun onFixClick(v: View?, holder: ToDoViewHolder) {
-                    holder.fix.visibility = View.GONE
-                    holder.linearLayout.requestFocus()
-                    val todo = getEditedToDo(holder)
-                    CoroutineScope(Dispatchers.Main + job).launch {
-                        if (todo != null) repository.save(todo)
                     }
                 }
             }
