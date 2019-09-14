@@ -1,6 +1,7 @@
 package com.folta.todoapp.view.ui.todo
 
 import android.annotation.SuppressLint
+import android.app.DatePickerDialog
 import android.content.Context
 import android.net.Uri
 import android.os.Bundle
@@ -10,6 +11,7 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.CompoundButton
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.view.setMargins
 import androidx.fragment.app.Fragment
@@ -23,6 +25,7 @@ import com.folta.todoapp.data.local.ToDo
 import com.folta.todoapp.data.local.ToDoRepository
 import com.folta.todoapp.data.local.ToDoRepositoryLocal
 import com.folta.todoapp.view.TodoActivity
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_todo_list.*
 import kotlinx.android.synthetic.main.holder_todo.view.*
 import kotlinx.coroutines.CoroutineScope
@@ -49,6 +52,20 @@ class ToDoListFragment : Fragment() {
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
         super.onCreateOptionsMenu(menu, inflater)
         inflater?.inflate(R.menu.menu_todo, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        super.onOptionsItemSelected(item)
+        when (item?.itemId) {
+            R.id.calendar -> {
+                Toast.makeText(context, "Calender Click!", Toast.LENGTH_SHORT).show()
+                val picker = this.context?.let { it1 -> ToDoDatePickerDialog(it1) }
+                picker?.show()
+            }
+
+
+        }
+        return true
     }
 
     override fun onCreateView(
@@ -359,4 +376,8 @@ class ToDoListFragment : Fragment() {
     interface OnFragmentInteractionListener {
         fun onFragmentInteraction(uri: Uri)
     }
+}
+
+class ToDoDatePickerDialog(context: Context) : DatePickerDialog(context) {
+
 }

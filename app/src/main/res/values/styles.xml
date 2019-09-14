@@ -4,10 +4,22 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
+        <item name="actionBarTheme">@style/ActionBarStyle</item>
         <item name="android:windowBackground">@color/white</item>
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <style name="ActionBarStyle">
+        <item name="android:titleTextStyle">@style/ActionBarTitleStyle</item>
+        <item name="android:backgroundTint">@color/colorPrimary</item>
+        <item name="android:backgroundStacked">@android:color/white</item>
+    </style>
+
+    <style name="ActionBarTitleStyle">
+        <item name="android:textStyle">bold|italic</item>
+        <item name="android:textColor">@android:color/black</item>
     </style>
 
     <style name="SplashTheme" parent="AppTheme">

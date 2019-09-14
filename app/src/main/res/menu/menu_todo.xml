@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto">
-<item android:title="hogehoge2"
-        android:icon="@drawable/ic_edit"
-        app:showAsAction="collapseActionView"
-        />
-    <item android:title="hogehoge"
-            android:icon="@drawable/ic_check"
-            app:showAsAction="ifRoom"/>
+    <item
+            android:icon="@drawable/ic_edit"
+            android:title="hogehoge2"
+            app:showAsAction="collapseActionView" />
+    <item
+            android:id="@+id/calendar"
+            android:icon="@drawable/ic_calendar"
+            android:title="hogehoge"
+            app:showAsAction="ifRoom" />
 </menu>

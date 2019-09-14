@@ -49,8 +49,7 @@
             android:layout_gravity="bottom|end"
             android:layout_marginEnd="@dimen/dp16"
             android:layout_marginBottom="@dimen/dp72"
-            android:backgroundTint="#009688"
-            android:tint="#FFFFFF"
+            android:backgroundTint="@color/colorAccent"
             app:fabSize="auto"
             app:srcCompat="@drawable/ic_edit" />
 

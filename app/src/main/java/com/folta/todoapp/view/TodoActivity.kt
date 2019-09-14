@@ -1,5 +1,6 @@
 package com.folta.todoapp.view
 
+import android.content.res.ColorStateList
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -31,7 +32,7 @@ class TodoActivity : AppCompatActivity(), ToDoListFragment.OnFragmentInteraction
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         init()
-        title = ""
+
 
         window.requestFeature(Window.FEATURE_ACTION_BAR)
         Handler().postDelayed({
@@ -44,14 +45,10 @@ class TodoActivity : AppCompatActivity(), ToDoListFragment.OnFragmentInteraction
                     R.id.navigation_home, R.id.navigation_todo, R.id.navigation_notifications
                 )
             )
-//            setupActionBarWithNavController(navController, appBarConfiguration)
+            setupActionBarWithNavController(navController, appBarConfiguration)
             nav_view.setupWithNavController(navController)
 //        supportActionBar?.hide()
         }, Const.SPLASH_TIME)
-    }
-
-    override fun onResume() {
-        super.onResume()
     }
 
     private fun init() {
