@@ -15,6 +15,7 @@ data class ToDo(
     var isChecked: Boolean,
     var title: String,
     var content: String,
+    // yyyyMMdd
     val createdAt: String
 )
 
@@ -32,8 +33,8 @@ interface ToDoDAO {
     @Query("select max(id) from ToDo")
     suspend fun getNewestId(): Int
 
-    @Query("select * from ToDo where createdAt = :dateyyyyMMDD order by orderId")
-    suspend fun findByDate(dateyyyyMMDD: String): List<ToDo>
+    @Query("select * from ToDo where createdAt = :dateyyyyMMdd order by orderId")
+    suspend fun findByDate(dateyyyyMMdd: String): List<ToDo>
 
     @Update
     suspend fun update(todo: ToDo)

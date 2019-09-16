@@ -18,6 +18,7 @@ import com.folta.todoapp.Logger
 import com.folta.todoapp.R
 import com.folta.todoapp.view.ui.todo.ToDoListFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.jakewharton.threetenabp.AndroidThreeTen
 import kotlinx.android.synthetic.main.activity_todo.*
 
 class TodoActivity : AppCompatActivity(), ToDoListFragment.OnFragmentInteractionListener {
@@ -54,6 +55,7 @@ class TodoActivity : AppCompatActivity(), ToDoListFragment.OnFragmentInteraction
     private fun init() {
         //        起動初期処理
         Logger.init()
+        AndroidThreeTen.init(this)
     }
 
     fun setActionBarTitle(title: String) {

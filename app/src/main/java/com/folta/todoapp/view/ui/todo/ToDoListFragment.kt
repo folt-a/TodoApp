@@ -25,13 +25,17 @@ import com.folta.todoapp.data.local.ToDo
 import com.folta.todoapp.data.local.ToDoRepository
 import com.folta.todoapp.data.local.ToDoRepositoryLocal
 import com.folta.todoapp.view.TodoActivity
-import com.google.android.material.snackbar.Snackbar
+import com.jakewharton.threetenabp.AndroidThreeTen
 import kotlinx.android.synthetic.main.fragment_todo_list.*
 import kotlinx.android.synthetic.main.holder_todo.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import org.threeten.bp.LocalDate
+import org.threeten.bp.ZonedDateTime
+import org.threeten.bp.format.DateTimeFormatter
+import java.util.*
 
 class ToDoListFragment : Fragment() {
     private var listener: OnFragmentInteractionListener? = null
@@ -40,6 +44,7 @@ class ToDoListFragment : Fragment() {
     private lateinit var repository: ToDoRepository
 
     private lateinit var viewToDoList: MutableList<ToDo>
+    private lateinit var titleDate: LocalDate
 
     private val job = Job()
 
@@ -59,11 +64,21 @@ class ToDoListFragment : Fragment() {
         when (item?.itemId) {
             R.id.calendar -> {
                 Toast.makeText(context, "Calender Click!", Toast.LENGTH_SHORT).show()
-                val picker = this.context?.let { it1 -> ToDoDatePickerDialog(it1) }
+                val picker = this.context?.let { it -> DatePickerDialog(it) }
+                picker?.setOnDateSetListener { _, year, month, dayOfMonth ->
+                    titleDate = LocalDate.of(year, month + 1, dayOfMonth)
+                    val formatter = DateTimeFormatter.ofPattern("yyyy年MM月dd日")
+                    (activity as TodoActivity)?.setActionBarTitle(titleDate.format(formatter))
+                    CoroutineScope(Dispatchers.Main + job).launch {
+                        viewToDoList =
+                            repository.findByDate("${titleDate.year}${titleDate.monthValue + 1}${titleDate.dayOfMonth}")
+                                .toMutableList()
+                        todoAdapter.items = viewToDoList
+                        todoAdapter.notifyDataSetChanged()
+                    }
+                }
                 picker?.show()
             }
-
-
         }
         return true
     }
@@ -79,7 +94,10 @@ class ToDoListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setHasOptionsMenu(true)
-        (activity as TodoActivity)?.setActionBarTitle("2019/09/02")
+
+        titleDate = LocalDate.now()
+        val formatter = DateTimeFormatter.ofPattern("yyyy年MM月dd日")
+        (activity as TodoActivity)?.setActionBarTitle(titleDate.format(formatter))
 
         recycleView.setHasFixedSize(true)
         recycleView.layoutManager = LinearLayoutManager(this.context)
@@ -95,7 +113,9 @@ class ToDoListFragment : Fragment() {
 
         CoroutineScope(Dispatchers.Main + job).launch {
             repository = ToDoRepositoryLocal(view.context)
-            viewToDoList = repository.findByDate("").toMutableList()
+            viewToDoList =
+                repository.findByDate("${titleDate.year}${titleDate.monthValue + 1}${titleDate.dayOfMonth}")
+                    .toMutableList()
 
             todoAdapter = object : ToDoAdapter(viewToDoList) {
                 override fun onClick(v: View?, holder: ToDoViewHolder) {
@@ -282,13 +302,14 @@ class ToDoListFragment : Fragment() {
             } else {
                 orderId = 1
             }
+
             val todo =
                 ToDo(
                     id = 0,
                     isChecked = false,
                     content = "",
                     title = "",
-                    createdAt = "",
+                    createdAt = "${titleDate.year}${titleDate.monthValue + 1}${titleDate.dayOfMonth}",
                     orderId = orderId
                 )
             CoroutineScope(Dispatchers.Main + job).launch {
@@ -378,6 +399,19 @@ class ToDoListFragment : Fragment() {
     }
 }
 
-class ToDoDatePickerDialog(context: Context) : DatePickerDialog(context) {
-
-}
+//class ToDoDatePickerDialog(
+//    context: Context,
+//    dateSetListener: OnDateSetListener
+//) :
+//    DatePickerDialog(context) {
+//    //    var year: Int
+////    var month: Int
+////    var dayOfMonth: Int
+//    init {
+//        val calendar = Calendar.getInstance()
+//        this.datePicker.maxDate = calendar.timeInMillis
+//        this.setOnDateSetListener { view, year, month, dayOfMonth ->
+//        title
+//        }
+//    }
+//}

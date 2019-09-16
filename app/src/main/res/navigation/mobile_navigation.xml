@@ -15,7 +15,7 @@
     <fragment
             android:id="@+id/navigation_todo"
             android:name="com.folta.todoapp.view.ui.todo.ToDoListFragment"
-            android:label="今日のToDo"
+            android:label=""
             tools:layout="@layout/fragment_todo_list" />
 
     <fragment
