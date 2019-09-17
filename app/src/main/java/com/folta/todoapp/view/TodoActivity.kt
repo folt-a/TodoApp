@@ -1,13 +1,10 @@
 package com.folta.todoapp.view
 
-import android.content.res.ColorStateList
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
-import android.view.View
 import android.view.Window
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.os.postDelayed
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -17,7 +14,6 @@ import com.folta.todoapp.Const
 import com.folta.todoapp.Logger
 import com.folta.todoapp.R
 import com.folta.todoapp.view.ui.todo.ToDoListFragment
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.jakewharton.threetenabp.AndroidThreeTen
 import kotlinx.android.synthetic.main.activity_todo.*
 
@@ -43,7 +39,7 @@ class TodoActivity : AppCompatActivity(), ToDoListFragment.OnFragmentInteraction
             navController = findNavController(R.id.nav_host_fragment)
             appBarConfiguration = AppBarConfiguration(
                 setOf(
-                    R.id.navigation_home, R.id.navigation_todo, R.id.navigation_notifications
+                    R.id.navigation_home, R.id.navigation_todo, R.id.navigation_setting
                 )
             )
             setupActionBarWithNavController(navController, appBarConfiguration)

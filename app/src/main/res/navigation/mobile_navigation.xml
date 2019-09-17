@@ -19,8 +19,8 @@
             tools:layout="@layout/fragment_todo_list" />
 
     <fragment
-            android:id="@+id/navigation_notifications"
-            android:name="com.folta.todoapp.view.ui.notifications.NotificationsFragment"
-            android:label="@string/title_notifications"
-            tools:layout="@layout/fragment_notifications" />
+            android:id="@+id/navigation_setting"
+            android:name="com.folta.todoapp.view.ui.setting.SettingsFragment"
+            android:label="@string/title_setting"
+            tools:layout="@layout/fragment_setting" />
 </navigation>

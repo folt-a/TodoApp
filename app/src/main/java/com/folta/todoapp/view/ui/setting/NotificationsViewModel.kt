@@ -1,4 +1,4 @@
-package com.folta.todoapp.view.ui.notifications
+package com.folta.todoapp.view.ui.setting
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
