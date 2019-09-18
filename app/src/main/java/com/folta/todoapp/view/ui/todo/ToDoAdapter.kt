@@ -1,22 +1,31 @@
 package com.folta.todoapp.view.ui.todo
 
 import android.annotation.SuppressLint
+import android.graphics.Shader
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
+import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.recyclerview.widget.RecyclerView
 import com.folta.todoapp.Logger
 import com.folta.todoapp.R
 import com.folta.todoapp.data.local.ToDo
+import com.folta.todoapp.view.ui.TileDrawable
 import kotlinx.android.synthetic.main.holder_todo.view.*
 
 open class ToDoAdapter(var items: List<ToDo>) : RecyclerView.Adapter<ToDoAdapter.ToDoViewHolder>() {
 
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: ToDoViewHolder, pos: Int) {
+//        タグの背景を設定
+        val drawable = ContextCompat.getDrawable(holder.content.context, R.drawable.bg_pattern2)
+        drawable?.let {
+            holder.todoTagColor.setImageDrawable(TileDrawable(it, Shader.TileMode.REPEAT))
+        }
+
         holder.title.setText(items[pos].title)
 //      本文は改行削除＋入らない部分は非表示にする
         holder.contentText = items[pos].content
@@ -131,6 +140,7 @@ open class ToDoAdapter(var items: List<ToDo>) : RecyclerView.Adapter<ToDoAdapter
         val inputMethodManager =
             getSystemService(itemView.context, InputMethodManager::class.java)
         val linearLayout: LinearLayout = itemView.linearLayout
+        val todoTagColor: ImageView = itemView.todoTagColor
         val title: EditText = itemView.title
         val content: EditText = itemView.content
         var contentText: String = ""

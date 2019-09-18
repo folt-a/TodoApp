@@ -197,7 +197,7 @@ class ToDoListFragment : Fragment() {
                     if (mlp is ViewGroup.MarginLayoutParams) {
                         v?.let {
                             mlp.setMargins(
-                                0,
+                                v.context.resources.getDimensionPixelSize(R.dimen.dp8),
                                 v.context.resources.getDimensionPixelSize(R.dimen.dp8),
                                 0,
                                 0
@@ -242,7 +242,16 @@ class ToDoListFragment : Fragment() {
                     )
                     holder.content.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10f)
                     val mlp = holder.content.layoutParams
-                    if (mlp is ViewGroup.MarginLayoutParams) mlp.setMargins(0)
+                    if (mlp is ViewGroup.MarginLayoutParams) {
+                        v?.let {
+                            mlp.setMargins(
+                                v.context.resources.getDimensionPixelSize(R.dimen.dp8),
+                                0,
+                                0,
+                                0
+                            )
+                        }
+                    }
                     holder.detail.setImageResource(R.drawable.ic_detail)
 
                     holder.content.isEnabled = false
