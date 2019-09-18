@@ -68,7 +68,7 @@ class ToDoListFragment : Fragment() {
                     (activity as TodoActivity)?.setActionBarTitle(titleDate.format(formatter))
                     CoroutineScope(Dispatchers.Main + job).launch {
                         viewToDoList =
-                            repository.findByDate("${titleDate.year}${titleDate.monthValue + 1}${titleDate.dayOfMonth}")
+                            repository.findByDate(titleDate.toStringyyyyMMdd())
                                 .toMutableList()
                         todoAdapter.items = viewToDoList
                         todoAdapter.notifyDataSetChanged()
@@ -79,6 +79,9 @@ class ToDoListFragment : Fragment() {
         }
         return true
     }
+
+    private fun LocalDate.toStringyyyyMMdd(): String =
+        "${this.year}${this.monthValue + 1}${this.dayOfMonth}"
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -111,7 +114,7 @@ class ToDoListFragment : Fragment() {
         CoroutineScope(Dispatchers.Main + job).launch {
             repository = ToDoRepositoryLocal(view.context)
             viewToDoList =
-                repository.findByDate("${titleDate.year}${titleDate.monthValue + 1}${titleDate.dayOfMonth}")
+                repository.findByDate(titleDate.toStringyyyyMMdd())
                     .toMutableList()
 
             todoAdapter = object : ToDoAdapter(viewToDoList) {
@@ -379,7 +382,7 @@ class ToDoListFragment : Fragment() {
             repository.saveSort(viewToDoList)
             Logger.d("List Saved!!")
 
-            viewToDoList = repository.findByDate("").toMutableList()
+            viewToDoList = repository.findByDate(titleDate.toStringyyyyMMdd()).toMutableList()
             todoAdapter.items = viewToDoList
             todoAdapter.notifyDataSetChanged()
         }
