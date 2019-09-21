@@ -18,4 +18,14 @@
     <color name="zero">#00000000</color>
     <color name="white">#FFFFFF</color>
     <color name="gray">#C3C3C3</color>
+
+    <color name="c1">#EF5350</color>
+    <color name="c2">#FF7043</color>
+    <color name="c3">#AB47BC</color>
+    <color name="c4">#5C6BC0</color>
+    <color name="c5">#26C6DA</color>
+    <color name="c6">#9CCC65</color>
+    <color name="c7">#FFEE58</color>
+
+
 </resources>

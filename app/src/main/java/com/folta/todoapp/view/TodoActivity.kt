@@ -10,12 +10,20 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import androidx.room.Room
 import com.folta.todoapp.Const
 import com.folta.todoapp.Logger
 import com.folta.todoapp.R
+import com.folta.todoapp.data.local.MyDataBase
+import com.folta.todoapp.data.local.TagRepository
 import com.folta.todoapp.view.ui.todo.ToDoListFragment
 import com.jakewharton.threetenabp.AndroidThreeTen
 import kotlinx.android.synthetic.main.activity_todo.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 
 class TodoActivity : AppCompatActivity(), ToDoListFragment.OnFragmentInteractionListener {
     override fun onFragmentInteraction(uri: Uri) {
@@ -27,9 +35,9 @@ class TodoActivity : AppCompatActivity(), ToDoListFragment.OnFragmentInteraction
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        init()
 
         window.requestFeature(Window.FEATURE_ACTION_BAR)
+
         Handler().postDelayed({
             setTheme(R.style.AppTheme)
             setContentView(R.layout.activity_todo)
@@ -43,12 +51,6 @@ class TodoActivity : AppCompatActivity(), ToDoListFragment.OnFragmentInteraction
             setupActionBarWithNavController(navController, appBarConfiguration)
             nav_view.setupWithNavController(navController)
         }, Const.SPLASH_TIME)
-    }
-
-    private fun init() {
-        //        起動初期処理
-        Logger.init()
-        AndroidThreeTen.init(this)
     }
 
     fun setActionBarTitle(title: String) {

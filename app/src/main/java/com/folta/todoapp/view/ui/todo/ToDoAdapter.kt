@@ -1,7 +1,9 @@
 package com.folta.todoapp.view.ui.todo
 
 import android.annotation.SuppressLint
+import android.graphics.Outline
 import android.graphics.Shader
+import android.graphics.drawable.VectorDrawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +12,7 @@ import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.recyclerview.widget.RecyclerView
+import com.folta.todoapp.EditTextMemo
 import com.folta.todoapp.Logger
 import com.folta.todoapp.R
 import com.folta.todoapp.data.local.ToDo
@@ -20,26 +23,16 @@ open class ToDoAdapter(var items: List<ToDo>) : RecyclerView.Adapter<ToDoAdapter
 
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: ToDoViewHolder, pos: Int) {
-//        タグの背景を設定
-        val drawable = ContextCompat.getDrawable(holder.content.context, R.drawable.bg_pattern2)
+        val item = items[pos]
+        val drawable = ContextCompat.getDrawable(holder.todoTag.context, R.drawable.bg_pattern8)
         drawable?.let {
-            holder.todoTagColor.setImageDrawable(TileDrawable(it, Shader.TileMode.REPEAT))
+            drawable.setTint(holder.todoTag.resources.getColor(R.color.colorSub))
+            holder.todoTag.setImageDrawable(TileDrawable(it, Shader.TileMode.REPEAT))
         }
-
-        holder.title.setText(items[pos].title)
-//      本文は改行削除＋入らない部分は非表示にする
-        holder.contentText = items[pos].content
-        if (holder.contentText.length > 20) {
-            holder.content.setText("${holder.contentText.replace("\n", " ").substring(0..20)}...")
-            holder.content.visibility = View.VISIBLE
-        } else if (items[pos].content.isEmpty()) {
-            holder.content.visibility = View.GONE
-        } else {
-            holder.content.visibility = View.VISIBLE
-            holder.content.setText(holder.contentText.replace("\n", " "))
-        }
-        holder.isDone.isChecked = items[pos].isChecked
-        Logger.d(holder.contentText)
+        holder.title.setText(item.title)
+        holder.content.setMemoText(item.content)
+        holder.isDone.isChecked = item.isChecked
+        Logger.d(holder.content.fullText)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ToDoViewHolder {
@@ -47,39 +40,42 @@ open class ToDoAdapter(var items: List<ToDo>) : RecyclerView.Adapter<ToDoAdapter
         val view = layoutInflater.inflate(R.layout.holder_todo, parent, false)
         val holder = ToDoViewHolder(view)
 
-        holder.itemView.setOnClickListener { v ->
-            onClick(v, holder)
-        }
+//        listenerをセットする
+        with(holder.itemView) {
+            setOnClickListener { v ->
+                onClick(v, holder)
+            }
 
-        holder.itemView.isDone.setOnCheckedChangeListener { v, _ ->
-            onDoneCheck(v, holder)
-        }
+            isDone.setOnCheckedChangeListener { v, _ ->
+                onDoneCheck(v, holder)
+            }
 
-        holder.itemView.title.setOnClickListener { v ->
-            onTitleClick(v, holder)
-        }
+            title.setOnClickListener { v ->
+                onTitleClick(v, holder)
+            }
 
-        holder.itemView.title.setOnEditorActionListener { v, actionId, _ ->
-            onTitleEditorAction(v, actionId, holder)
-        }
+            title.setOnEditorActionListener { v, actionId, _ ->
+                onTitleEditorAction(v, actionId, holder)
+            }
 
-        holder.itemView.title.setOnFocusChangeListener { v, hasFocus ->
-            if (onTitleFocusChange(v, hasFocus, holder)) return@setOnFocusChangeListener
-        }
+            title.setOnFocusChangeListener { v, hasFocus ->
+                if (onTitleFocusChange(v, hasFocus, holder)) return@setOnFocusChangeListener
+            }
 
-        holder.itemView.content.setOnClickListener { v ->
-            onContentClick(v, holder)
-        }
+            content.setOnClickListener { v ->
+                onContentClick(v, holder)
+            }
 
-        holder.itemView.content.setOnFocusChangeListener { v, hasFocus ->
-            if (onContentFocusChange(v, hasFocus, holder)) return@setOnFocusChangeListener
-        }
+            content.setOnFocusChangeListener { v, hasFocus ->
+                if (onContentFocusChange(v, hasFocus, holder)) return@setOnFocusChangeListener
+            }
 
-        holder.itemView.detail.setOnClickListener { v ->
-            if (holder.isShowDetail) {
-                closeContentDetail(v, holder)
-            } else {
-                showContentDetail(v, holder)
+            detail.setOnClickListener { v ->
+                if (holder.isShowDetail) {
+                    closeContentDetail(v, holder)
+                } else {
+                    showContentDetail(v, holder)
+                }
             }
         }
 
@@ -101,8 +97,8 @@ open class ToDoAdapter(var items: List<ToDo>) : RecyclerView.Adapter<ToDoAdapter
         val item = items.getOrNull(holder.adapterPosition)
         item?.title = holder.title.text.toString()
         if (holder.content.isEnabled) {
-            item?.content = holder.contentText
-            Logger.d("content change : " + holder.contentText)
+            item?.content = holder.content.fullText
+            Logger.d("content change : " + holder.content.fullText)
         }
         item?.isChecked = holder.isDone.isChecked
         return item
@@ -140,12 +136,13 @@ open class ToDoAdapter(var items: List<ToDo>) : RecyclerView.Adapter<ToDoAdapter
         val inputMethodManager =
             getSystemService(itemView.context, InputMethodManager::class.java)
         val linearLayout: LinearLayout = itemView.linearLayout
-        val todoTagColor: ImageView = itemView.todoTagColor
+        val todoTag: ImageView = itemView.todoTag
         val title: EditText = itemView.title
-        val content: EditText = itemView.content
-        var contentText: String = ""
+        val content: EditTextMemo = itemView.content
         val isDone: CheckBox = itemView.isDone
         val detail: ImageButton = itemView.detail
         var isShowDetail = false
+
+
     }
 }

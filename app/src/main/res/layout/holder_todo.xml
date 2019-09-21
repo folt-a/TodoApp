@@ -20,10 +20,11 @@
             android:paddingBottom="2dp">
 
         <ImageView
-                android:id="@+id/todoTagColor"
+                android:id="@+id/todoTag"
                 android:layout_width="24dp"
                 android:layout_height="0dp"
                 android:layout_margin="0dp"
+                android:background="@color/white"
                 android:foregroundGravity="left"
                 android:padding="0dp"
                 android:scaleType="centerCrop"
@@ -37,8 +38,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
-                android:buttonTint="#F44336"
-                app:layout_constraintStart_toEndOf="@id/todoTagColor"
+                android:buttonTint="@color/colorAccent"
+                android:scaleX="1.4"
+                android:scaleY="1.4"
+                app:layout_constraintStart_toEndOf="@id/todoTag"
                 app:layout_constraintTop_toTopOf="parent" />
 
         <EditText
@@ -57,9 +60,10 @@
                 app:layout_constraintStart_toEndOf="@+id/isDone"
                 app:layout_constraintTop_toTopOf="@+id/isDone"
                 tools:layout_conversion_wrapHeight="50"
-                tools:layout_conversion_wrapWidth="1038" />
+                tools:layout_conversion_wrapWidth="1038"
+                android:autofillHints="no" />
 
-        <EditText
+        <com.folta.todoapp.EditTextMemo
                 android:id="@+id/content"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -74,7 +78,7 @@
                 android:textColor="#999999"
                 android:textSize="10sp"
                 app:layout_constraintEnd_toEndOf="@+id/title"
-                app:layout_constraintStart_toEndOf="@id/todoTagColor"
+                app:layout_constraintStart_toEndOf="@id/todoTag"
                 app:layout_constraintTop_toBottomOf="@+id/isDone"
                 tools:layout_conversion_wrapHeight="43"
                 tools:layout_conversion_wrapWidth="1038" />
@@ -84,6 +88,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
+                android:layout_marginRight="8dp"
                 android:background="#00FFFFFF"
                 android:padding="4dp"
                 android:tint="#00BCD4"

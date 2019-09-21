@@ -13,17 +13,13 @@ import android.widget.CompoundButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
-import androidx.core.view.setMargins
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.folta.todoapp.Logger
 import com.folta.todoapp.R
 import com.folta.todoapp.data.local.ToDo
 import com.folta.todoapp.data.local.ToDoRepository
-import com.folta.todoapp.data.local.ToDoRepositoryLocal
 import com.folta.todoapp.view.TodoActivity
 import kotlinx.android.synthetic.main.fragment_todo_list.*
 import kotlinx.android.synthetic.main.holder_todo.view.*
@@ -33,23 +29,18 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.threeten.bp.LocalDate
 import org.threeten.bp.format.DateTimeFormatter
+import org.koin.android.ext.android.inject
 
 class ToDoListFragment : Fragment() {
     private var listener: OnFragmentInteractionListener? = null
 
     private lateinit var todoAdapter: ToDoAdapter
-    private lateinit var repository: ToDoRepository
+    private val todoRepository by inject<ToDoRepository>()
 
     private lateinit var viewToDoList: MutableList<ToDo>
     private lateinit var titleDate: LocalDate
 
     private val job = Job()
-
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {}
-    }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
@@ -64,16 +55,17 @@ class ToDoListFragment : Fragment() {
                 val picker = this.context?.let { it -> DatePickerDialog(it) }
                 picker?.setOnDateSetListener { _, year, month, dayOfMonth ->
                     titleDate = LocalDate.of(year, month + 1, dayOfMonth)
-                    val formatter = DateTimeFormatter.ofPattern("yyyy年MM月dd日")
+                    val formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
                     (activity as TodoActivity)?.setActionBarTitle(titleDate.format(formatter))
                     CoroutineScope(Dispatchers.Main + job).launch {
                         viewToDoList =
-                            repository.findByDate(titleDate.toStringyyyyMMdd())
+                            todoRepository.findByDate(titleDate.toStringyyyyMMdd())
                                 .toMutableList()
                         todoAdapter.items = viewToDoList
                         todoAdapter.notifyDataSetChanged()
                     }
                 }
+                picker?.updateDate(titleDate.year, titleDate.monthValue - 1, titleDate.dayOfMonth)
                 picker?.show()
             }
         }
@@ -96,7 +88,7 @@ class ToDoListFragment : Fragment() {
         setHasOptionsMenu(true)
 
         titleDate = LocalDate.now()
-        val formatter = DateTimeFormatter.ofPattern("yyyy年MM月dd日")
+        val formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
         (activity as TodoActivity)?.setActionBarTitle(titleDate.format(formatter))
 
         recycleView.setHasFixedSize(true)
@@ -112,9 +104,8 @@ class ToDoListFragment : Fragment() {
         }
 
         CoroutineScope(Dispatchers.Main + job).launch {
-            repository = ToDoRepositoryLocal(view.context)
             viewToDoList =
-                repository.findByDate(titleDate.toStringyyyyMMdd())
+                todoRepository.findByDate(titleDate.toStringyyyyMMdd())
                     .toMutableList()
 
             todoAdapter = object : ToDoAdapter(viewToDoList) {
@@ -131,7 +122,7 @@ class ToDoListFragment : Fragment() {
                 override fun onDoneCheck(v: CompoundButton?, holder: ToDoViewHolder) {
                     val todo = getEditedToDo(holder)
                     CoroutineScope(Dispatchers.Main + job).launch {
-                        if (todo != null) repository.save(todo)
+                        if (todo != null) todoRepository.save(todo)
                     }
                 }
 
@@ -153,7 +144,7 @@ class ToDoListFragment : Fragment() {
                     } else {
                         val todo = getEditedToDo(holder)
                         CoroutineScope(Dispatchers.Main + job).launch {
-                            if (todo != null) repository.save(todo)
+                            if (todo != null) todoRepository.save(todo)
                         }
                         fab.visibility = View.VISIBLE
                         holder.inputMethodManager?.hideSoftInputFromWindow(v?.windowToken, 0)
@@ -219,19 +210,7 @@ class ToDoListFragment : Fragment() {
                     onContentFocusChange(v, false, holder)
 //      本文は改行削除＋入らない部分は非表示にする
                     val pos = holder.adapterPosition
-                    holder.contentText = items[pos].content
-                    if (items[pos].content.length > 20) {
-                        holder.content.visibility = View.VISIBLE
-                        val text = items[pos].content.replace("\n", " ").substring(0..20) + "..."
-                        holder.content.setText(text)
-                    } else if (items[pos].content.isEmpty()) {
-                        Logger.d("empty")
-                        holder.content.visibility = View.GONE
-                    } else {
-                        holder.content.visibility = View.VISIBLE
-                        val text = items[pos].content.replace("\n", " ")
-                        holder.content.setText(text)
-                    }
+                    holder.content.setMemoText(items[pos].content)
 
                     holder.content.background = null
                     holder.content.setPadding(
@@ -276,11 +255,11 @@ class ToDoListFragment : Fragment() {
                     if (hasFocus) {
                         return holder.content.performClick()
                     } else {
-                        holder.contentText = holder.content.text.toString()
+                        holder.content.fullText = holder.content.text.toString()
                         Logger.d("onContentFocusChange : $hasFocus")
                         val todo = getEditedToDo(holder)
                         CoroutineScope(Dispatchers.Main + job).launch {
-                            if (todo != null) repository.save(todo)
+                            if (todo != null) todoRepository.save(todo)
                         }
                         fab.visibility = View.VISIBLE
                         holder.inputMethodManager?.hideSoftInputFromWindow(v?.windowToken, 0)
@@ -322,10 +301,12 @@ class ToDoListFragment : Fragment() {
                     orderId = orderId
                 )
             CoroutineScope(Dispatchers.Main + job).launch {
-                val savedId = repository.save(todo)
-                val savedToDo = repository.find(savedId)
-                viewToDoList.add(savedToDo)
-                todoAdapter.notifyItemInserted(todoAdapter.itemCount - 1)
+                val savedId = todoRepository.save(todo)
+                val savedToDo = todoRepository.find(savedId)
+                savedToDo?.let { it ->
+                    viewToDoList.add(it)
+                    todoAdapter.notifyItemInserted(todoAdapter.itemCount - 1)
+                }
             }
         }
 
@@ -337,42 +318,33 @@ class ToDoListFragment : Fragment() {
             coordinatorLayout.requestFocus()
         }
 
-        val getRecyclerViewSimpleCallBack =
-            // 引数で、上下のドラッグ、および左方向のスワイプを有効にしている。
-            object : ItemTouchHelper.SimpleCallback(
-                ItemTouchHelper.UP or ItemTouchHelper.DOWN,
-                ItemTouchHelper.LEFT
-            ) {
-                override fun onMove(
-                    recyclerView: RecyclerView,
-                    viewHolder: RecyclerView.ViewHolder,
-                    target: RecyclerView.ViewHolder
-                ): Boolean {
-                    val fromPosition = viewHolder.adapterPosition
-                    val toPosition = target.adapterPosition
-
-                    viewToDoList.add(toPosition, viewToDoList.removeAt(fromPosition))
-                    todoAdapter.notifyItemMoved(fromPosition, toPosition)
-                    return true
-                }
-
-                // スワイプしたとき
-                override fun onSwiped(p0: RecyclerView.ViewHolder, p1: Int) {
-                    p0.let {
-                        CoroutineScope(Dispatchers.Main + job).launch {
-                            // 実データセットからアイテムを削除
-                            repository.delete(todoAdapter.items[p0.adapterPosition].id)
-                            Logger.d("delete : ${todoAdapter.items[p0.adapterPosition].id}")
-                            viewToDoList.removeAt(p0.adapterPosition)
-                            Logger.d("remove : ${p0.adapterPosition}")
-                            todoAdapter.notifyItemRemoved(p0.adapterPosition)
-                        }
-                    }
-                }
-            }
-
-        val itemTouchHelper = ItemTouchHelper(getRecyclerViewSimpleCallBack)
-        itemTouchHelper.attachToRecyclerView(recycleView)
+//        val getRecyclerViewSimpleCallBack =
+//            // 引数で、上下のドラッグ、および左方向のスワイプを有効にしている。
+//            object : ItemTouchHelper.SimpleCallback(
+//                ItemTouchHelper.UP or ItemTouchHelper.DOWN,
+//                ItemTouchHelper.LEFT
+//            ) {
+//                override fun onMove(
+//                    recyclerView: RecyclerView,
+//                    viewHolder: RecyclerView.ViewHolder,
+//                    target: RecyclerView.ViewHolder
+//                ): Boolean {
+//                    val fromPosition = viewHolder.adapterPosition
+//                    val toPosition = target.adapterPosition
+//
+//                    viewToDoList.add(toPosition, viewToDoList.removeAt(fromPosition))
+//                    todoAdapter.notifyItemMoved(fromPosition, toPosition)
+//                    return true
+//                }
+//
+//                // スワイプしたとき
+//                override fun onSwiped(p0: RecyclerView.ViewHolder, p1: Int) {
+//                    p0.let {
+//                        CoroutineScope(Dispatchers.Main + job).launch {
+//                            // 実データセットからアイテムを削除
+//                            todoRepository.delete(todoAdapter.items[p0.adapterPosition].id)
+//                            Logger.d("delete : ${todoAdapter.items[p0.adapterPosition].id}")
+//                            viewToDoList.removeAt(p0r
     }
 
     override fun onAttach(context: Context) {
@@ -388,10 +360,10 @@ class ToDoListFragment : Fragment() {
     override fun onStop() {
         Logger.d("onStop")
         CoroutineScope(Dispatchers.Main + job).launch {
-            repository.saveSort(viewToDoList)
+            todoRepository.saveSort(viewToDoList)
             Logger.d("List Saved!!")
 
-            viewToDoList = repository.findByDate(titleDate.toStringyyyyMMdd()).toMutableList()
+            viewToDoList = todoRepository.findByDate(titleDate.toStringyyyyMMdd()).toMutableList()
             todoAdapter.items = viewToDoList
             todoAdapter.notifyDataSetChanged()
         }
