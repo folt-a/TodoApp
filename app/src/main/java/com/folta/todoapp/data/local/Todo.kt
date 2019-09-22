@@ -10,6 +10,7 @@ data class ToDo(
     var isChecked: Boolean,
     var title: String,
     var content: String,
+    var tagId:Int,
     // yyyyMMdd
     val createdAt: String
 )

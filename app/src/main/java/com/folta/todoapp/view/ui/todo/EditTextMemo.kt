@@ -11,7 +11,7 @@ import com.folta.todoapp.view.ui.setting.Pref
 class EditTextMemo(context: Context, attrs: AttributeSet) : AppCompatEditText(context, attrs) {
     var isOpen: Boolean = false
     var fullText: String = this.text.toString()
-    var textState: MemoOpen? = context?.let { Pref(it).memoOpen }
+    var textState: MemoOpen? =  Pref(context).memoOpen
 
     @SuppressLint("SetTextI18n")
     fun setMemoText(text: String) {

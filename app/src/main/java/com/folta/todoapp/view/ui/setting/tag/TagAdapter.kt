@@ -19,14 +19,29 @@ open class TagAdapter(var items: List<Tag>) : RecyclerView.Adapter<TagAdapter.Ta
 
     override fun onBindViewHolder(holder: TagViewHolder, position: Int) {
         val item = items[position]
-        val todoTagDrawable = ContextCompat.getDrawable(holder.todoTag.context, R.drawable.bg_pattern8)
+
+        if (item.isDeleted) return
+
+        val todoTagDrawable = ContextCompat.getDrawable(holder.todoTag.context, item.pattern)
         todoTagDrawable?.let {
-            todoTagDrawable.setTint(holder.todoTag.resources.getColor(R.color.colorSub))
+            it.setTint(holder.todoTag.resources.getColor(item.color))
             holder.todoTag.setImageDrawable(TileDrawable(it, Shader.TileMode.REPEAT))
         }
 
+//        mutate()がなければ自動的に最適化されてすべてのHolderが同じ色、パターンで表示されてしまう
+        val tagPatternDrawable = ContextCompat.getDrawable(holder.tagPattern.context, item.pattern)
+        tagPatternDrawable?.let { it ->
+            it.setTint(holder.todoTag.resources.getColor(R.color.black))
+            holder.tagPattern.setImageDrawable(it.mutate())
+        }
 
+        val tagColorDrawable = ContextCompat.getDrawable(holder.tagColor.context, R.drawable.bg_pattern1)
+        tagColorDrawable?.let { it ->
+            it.setTint(holder.todoTag.resources.getColor(item.color))
+            holder.tagColor.setImageDrawable(it.mutate())
+        }
 
+        holder.tagName.setText(item.tagName)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TagViewHolder {
@@ -42,6 +57,10 @@ open class TagAdapter(var items: List<Tag>) : RecyclerView.Adapter<TagAdapter.Ta
     }
 
     override fun getItemCount(): Int = items.size
+
+    override fun getItemId(position: Int): Long {
+        return items[position].id.toLong()
+    }
 
     inner class TagViewHolder(itemView: View) :
         RecyclerView.ViewHolder(itemView) {

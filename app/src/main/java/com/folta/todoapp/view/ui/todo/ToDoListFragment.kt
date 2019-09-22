@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.folta.todoapp.Logger
 import com.folta.todoapp.R
+import com.folta.todoapp.data.local.TagRepository
 import com.folta.todoapp.data.local.ToDo
 import com.folta.todoapp.data.local.ToDoRepository
 import com.folta.todoapp.view.TodoActivity
@@ -37,6 +38,8 @@ class ToDoListFragment : Fragment() {
     private lateinit var todoAdapter: ToDoAdapter
     private val todoRepository by inject<ToDoRepository>()
 
+    private val tagRepository by inject<TagRepository>()
+
     private lateinit var viewToDoList: MutableList<ToDo>
     private lateinit var titleDate: LocalDate
 
@@ -44,19 +47,19 @@ class ToDoListFragment : Fragment() {
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
-        inflater?.inflate(R.menu.menu_todo, menu)
+        inflater.inflate(R.menu.menu_todo, menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         super.onOptionsItemSelected(item)
-        when (item?.itemId) {
+        when (item.itemId) {
             R.id.calendar -> {
                 Toast.makeText(context, "Calender Click!", Toast.LENGTH_SHORT).show()
                 val picker = this.context?.let { it -> DatePickerDialog(it) }
                 picker?.setOnDateSetListener { _, year, month, dayOfMonth ->
                     titleDate = LocalDate.of(year, month + 1, dayOfMonth)
                     val formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
-                    (activity as TodoActivity)?.setActionBarTitle(titleDate.format(formatter))
+                    (activity as TodoActivity).setActionBarTitle(titleDate.format(formatter))
                     CoroutineScope(Dispatchers.Main + job).launch {
                         viewToDoList =
                             todoRepository.findByDate(titleDate.toStringyyyyMMdd())
@@ -89,7 +92,7 @@ class ToDoListFragment : Fragment() {
 
         titleDate = LocalDate.now()
         val formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
-        (activity as TodoActivity)?.setActionBarTitle(titleDate.format(formatter))
+        (activity as TodoActivity).setActionBarTitle(titleDate.format(formatter))
 
         recycleView.setHasFixedSize(true)
         recycleView.layoutManager = LinearLayoutManager(this.context)
@@ -107,8 +110,8 @@ class ToDoListFragment : Fragment() {
             viewToDoList =
                 todoRepository.findByDate(titleDate.toStringyyyyMMdd())
                     .toMutableList()
-
-            todoAdapter = object : ToDoAdapter(viewToDoList) {
+            val tagList = tagRepository.getAll().toMutableList()
+            todoAdapter = object : ToDoAdapter(viewToDoList, tagList) {
                 override fun onClick(v: View?, holder: ToDoViewHolder) {
                     if (holder.isShowDetail) {
                         holder.title.requestFocus()
@@ -169,6 +172,16 @@ class ToDoListFragment : Fragment() {
                             return false
                         }
                     }
+                }
+
+                override fun onSpinnerSelected(v: View?, id: Int, holder: ToDoViewHolder) {
+                    Logger.d("スピナー onItemSelected id = $id")
+                    val todo = getEditedToDo(holder)
+                    CoroutineScope(Dispatchers.Main + job).launch {
+                        if (todo != null) todoRepository.save(todo)
+                    }
+//                    タグ変更されたので描画やりなおし
+                    onBindViewHolder(holder, holder.adapterPosition)
                 }
 
                 override fun showContentDetail(v: View?, holder: ToDoViewHolder) {
@@ -297,6 +310,7 @@ class ToDoListFragment : Fragment() {
                     isChecked = false,
                     content = "",
                     title = "",
+                    tagId = 0,
                     createdAt = "${titleDate.year}${titleDate.monthValue + 1}${titleDate.dayOfMonth}",
                     orderId = orderId
                 )

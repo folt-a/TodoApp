@@ -50,6 +50,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="8dp"
+                android:autofillHints="no"
                 android:backgroundTint="#B2DFDB"
                 android:focusable="false"
                 android:hint="@string/ui_placeholder_title"
@@ -60,8 +61,28 @@
                 app:layout_constraintStart_toEndOf="@+id/isDone"
                 app:layout_constraintTop_toTopOf="@+id/isDone"
                 tools:layout_conversion_wrapHeight="50"
-                tools:layout_conversion_wrapWidth="1038"
-                android:autofillHints="no" />
+                tools:layout_conversion_wrapWidth="1038" />
+
+            <TextView
+                    android:id="@+id/tagTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/holder_tag_text_view"
+                    android:textSize="16sp"
+                    app:layout_constraintStart_toEndOf="@id/todoTag"
+                    app:layout_constraintTop_toBottomOf="@+id/isDone" />
+
+            <Spinner
+                    android:id="@+id/tagSpinner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:entries="@array/memo_open_entries"
+
+                    app:layout_constraintBottom_toBottomOf="@+id/tagTextView"
+                    app:layout_constraintStart_toEndOf="@id/tagTextView"
+                    app:layout_constraintTop_toTopOf="@+id/tagTextView" />
 
         <com.folta.todoapp.view.ui.todo.EditTextMemo
                 android:id="@+id/content"
@@ -79,7 +100,7 @@
                 android:textSize="10sp"
                 app:layout_constraintEnd_toEndOf="@+id/title"
                 app:layout_constraintStart_toEndOf="@id/todoTag"
-                app:layout_constraintTop_toBottomOf="@+id/isDone"
+                app:layout_constraintTop_toBottomOf="@+id/tagSpinner"
                 tools:layout_conversion_wrapHeight="43"
                 tools:layout_conversion_wrapWidth="1038" />
 

@@ -16,22 +16,7 @@
             android:id="@+id/navigation_todo"
             android:name="com.folta.todoapp.view.ui.todo.ToDoListFragment"
             android:label=""
-            tools:layout="@layout/fragment_todo_list" >
-        <action
-                android:id="@+id/action_navigation_todo_to_navigation_home"
-                app:destination="@id/navigation_home"
-                app:enterAnim="@anim/nav_default_enter_anim"
-                app:exitAnim="@anim/nav_default_exit_anim"
-                app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-                app:popExitAnim="@anim/nav_default_pop_exit_anim"/>
-        <action
-                android:id="@+id/action_navigation_todo_to_navigation_setting"
-                app:destination="@id/navigation_setting"
-                app:enterAnim="@anim/nav_default_enter_anim"
-                app:exitAnim="@anim/nav_default_exit_anim"
-                app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-                app:popExitAnim="@anim/nav_default_pop_exit_anim"/>
-    </fragment>
+            tools:layout="@layout/fragment_todo_list" />
 
     <fragment
             android:id="@+id/navigation_setting"
@@ -43,9 +28,9 @@
                 app:destination="@id/navigation_tag"
                 app:enterAnim="@anim/nav_default_enter_anim"
                 app:exitAnim="@anim/nav_default_exit_anim"
-                app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-                app:popExitAnim="@anim/nav_default_pop_exit_anim"
-                app:popUpTo="@layout/fragment_setting"/>
+                app:popEnterAnim="@anim/slide_from_left"
+                app:popExitAnim="@anim/slide_to_right"
+                app:popUpTo="@layout/fragment_setting" />
     </fragment>
 
     <fragment
