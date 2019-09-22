@@ -1,4 +1,4 @@
-package com.folta.todoapp
+package com.folta.todoapp.view.ui.todo
 
 import android.annotation.SuppressLint
 import android.content.Context

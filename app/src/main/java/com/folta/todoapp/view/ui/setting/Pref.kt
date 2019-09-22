@@ -6,7 +6,7 @@ import androidx.preference.PreferenceManager
 import com.folta.todoapp.R
 
 interface Profile {
-    val memoOpen: MemoOpen
+    var memoOpen: MemoOpen
     val tagColor: TagColor
     val tagPattern: TagPattern
 }
@@ -22,15 +22,15 @@ class Pref(context: Context) : Profile {
     private val pref: SharedPreferences =
         PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
 
-    override val memoOpen: MemoOpen
+    override var memoOpen: MemoOpen
         get() = MemoOpen.from(pref.getString(PREF_KEY_MEMO_OPEN, MemoOpen.AllOpen.value))
+        set(memoOpen) = pref.edit().putString(PREF_KEY_MEMO_OPEN,memoOpen.value).apply()
 
     override val tagColor: TagColor
         get() = TagColor.from(pref.getInt(PREF_KEY_TAG_COLOR, TagColor.Color1.value))
 
     override val tagPattern: TagPattern
         get() = TagPattern.from(pref.getInt(PREF_KEY_TAG_PATTERN, TagPattern.Pattern1.value))
-
 
 }
 

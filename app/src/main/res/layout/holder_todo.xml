@@ -63,7 +63,7 @@
                 tools:layout_conversion_wrapWidth="1038"
                 android:autofillHints="no" />
 
-        <com.folta.todoapp.EditTextMemo
+        <com.folta.todoapp.view.ui.todo.EditTextMemo
                 android:id="@+id/content"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"

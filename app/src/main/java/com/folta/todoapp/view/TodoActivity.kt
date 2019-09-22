@@ -5,27 +5,19 @@ import android.os.Bundle
 import android.os.Handler
 import android.view.Window
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.AppLaunchChecker
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import androidx.room.Room
 import com.folta.todoapp.Const
-import com.folta.todoapp.Logger
 import com.folta.todoapp.R
-import com.folta.todoapp.data.local.MyDataBase
-import com.folta.todoapp.data.local.TagRepository
+import com.folta.todoapp.view.ui.setting.tag.TagFragment
 import com.folta.todoapp.view.ui.todo.ToDoListFragment
-import com.jakewharton.threetenabp.AndroidThreeTen
 import kotlinx.android.synthetic.main.activity_todo.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import org.koin.android.ext.android.inject
 
-class TodoActivity : AppCompatActivity(), ToDoListFragment.OnFragmentInteractionListener {
+class TodoActivity : AppCompatActivity(), ToDoListFragment.OnFragmentInteractionListener ,TagFragment.OnListFragmentInteractionListener{
     override fun onFragmentInteraction(uri: Uri) {
 
     }
@@ -51,7 +43,11 @@ class TodoActivity : AppCompatActivity(), ToDoListFragment.OnFragmentInteraction
             setupActionBarWithNavController(navController, appBarConfiguration)
             nav_view.setupWithNavController(navController)
         }, Const.SPLASH_TIME)
+        AppLaunchChecker.onActivityCreate(this);
     }
+
+    override fun onSupportNavigateUp()
+            = navController.navigateUp()
 
     fun setActionBarTitle(title: String) {
         supportActionBar?.title = title

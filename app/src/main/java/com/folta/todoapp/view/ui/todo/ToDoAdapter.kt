@@ -1,9 +1,7 @@
 package com.folta.todoapp.view.ui.todo
 
 import android.annotation.SuppressLint
-import android.graphics.Outline
 import android.graphics.Shader
-import android.graphics.drawable.VectorDrawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,7 +10,6 @@ import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.recyclerview.widget.RecyclerView
-import com.folta.todoapp.EditTextMemo
 import com.folta.todoapp.Logger
 import com.folta.todoapp.R
 import com.folta.todoapp.data.local.ToDo
