@@ -5,6 +5,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
+import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.folta.todoapp.R
 
@@ -17,7 +19,7 @@ class SettingsFragment : Fragment() {
         activity?.supportFragmentManager?.beginTransaction()
             ?.replace(
                 R.id.settings,
-                SettingsFragment()
+                SettingsFragment(this)
             )
             ?.commit()
         activity?.actionBar?.setDisplayHomeAsUpEnabled(true)
@@ -25,9 +27,22 @@ class SettingsFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_setting, container, false)
     }
 
-    class SettingsFragment : PreferenceFragmentCompat() {
+    class SettingsFragment(private val settingsFragment: com.folta.todoapp.view.ui.setting.SettingsFragment) :
+        PreferenceFragmentCompat() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey)
+        }
+
+        override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+            super.onViewCreated(view, savedInstanceState)
+            val tagButton = findPreference<Preference>(getString(R.string.tagSettingButton))
+
+            tagButton?.setOnPreferenceClickListener {
+                settingsFragment.findNavController()
+                    .navigate(R.id.action_navigation_setting_to_navigation_tag)
+                return@setOnPreferenceClickListener true
+            }
+
         }
     }
 }

@@ -39,8 +39,6 @@ class TagFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         recycleView.layoutManager = LinearLayoutManager(this.context)
-
-
     }
 
     override fun onAttach(context: Context) {

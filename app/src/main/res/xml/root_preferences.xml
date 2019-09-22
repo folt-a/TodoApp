@@ -14,22 +14,27 @@
   ~ limitations under the License.
   -->
 
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <PreferenceCategory app:title="ToDo">
 
         <ListPreference
-                app:defaultValue="reply"
+                app:defaultValue="true"
                 app:entries="@array/memo_open_entries"
                 app:entryValues="@array/memo_open_values"
                 app:key="memoOpen"
                 app:title="閉じているToDoのメモ表示"
                 app:useSimpleSummaryProvider="true" />
 
-<!--        <EditTextPreference-->
-<!--                app:key="signature"-->
-<!--                app:title="@string/signature_title"-->
-<!--                app:useSimpleSummaryProvider="true" />-->
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="タグ">
+
+        <Preference
+                app:key="@string/tagSettingButton"
+                app:title="タグ設定"
+                app:summary="タグの追加、変更が行えます。"/>
 
     </PreferenceCategory>
 
