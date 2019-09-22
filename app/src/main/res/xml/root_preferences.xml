@@ -29,12 +29,12 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="タグ">
+    <PreferenceCategory app:title="@string/prefCategoryTagTitle">
 
         <Preference
                 app:key="@string/tagSettingButton"
-                app:title="タグ設定"
-                app:summary="タグの追加、変更が行えます。"/>
+                app:title="@string/tagSettingButtonTitle"
+                app:summary="@string/tagSettingButtonSummary"/>
 
     </PreferenceCategory>
 

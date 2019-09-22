@@ -42,8 +42,8 @@ class TodoActivity : AppCompatActivity(), ToDoListFragment.OnFragmentInteraction
             )
             setupActionBarWithNavController(navController, appBarConfiguration)
             nav_view.setupWithNavController(navController)
+            AppLaunchChecker.onActivityCreate(this)
         }, Const.SPLASH_TIME)
-        AppLaunchChecker.onActivityCreate(this);
     }
 
     override fun onSupportNavigateUp()

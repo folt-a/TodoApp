@@ -6,36 +6,36 @@ class TagRepositoryLocal : TagRepository {
     private val dao: TagDAO = MyDataBase.db.tagDAO()
 
     override suspend fun init() {
-        val tags = listOf<Tag>(
+        val tags = listOf(
             Tag(
                 id = 0,
-                tagName = "",
-                icon = R.drawable.bg_pattern2,
-                color = R.color.colorAccent
+                tagName = "タグ1",
+                pattern = R.drawable.bg_pattern7,
+                color = R.color.c1
             ),
             Tag(
                 id = 0,
-                tagName = "",
-                icon = R.drawable.bg_pattern2,
-                color = R.color.colorAccent
+                tagName = "タグ2",
+                pattern = R.drawable.bg_pattern2,
+                color = R.color.c2
             ),
             Tag(
                 id = 0,
-                tagName = "",
-                icon = R.drawable.bg_pattern2,
-                color = R.color.colorAccent
+                tagName = "タグ3",
+                pattern = R.drawable.bg_pattern3,
+                color = R.color.c4
             ),
             Tag(
                 id = 0,
-                tagName = "",
-                icon = R.drawable.bg_pattern2,
-                color = R.color.colorAccent
+                tagName = "タグ4",
+                pattern = R.drawable.bg_pattern4,
+                color = R.color.c6
             ),
             Tag(
                 id = 0,
-                tagName = "",
-                icon = R.drawable.bg_pattern2,
-                color = R.color.colorAccent
+                tagName = "タグ5",
+                pattern = R.drawable.bg_pattern5,
+                color = R.color.c7
             )
         )
         for (tag in tags) {
@@ -57,8 +57,8 @@ class TagRepositoryLocal : TagRepository {
     }
 
     override suspend fun delete(id: Int) {
-        // タグ削除は論理削除で見た目はタグなしにする。
-        val deleteTag = Tag(id = id, tagName = "", icon = R.drawable.bg_pattern2, color = R.color.white, isDeleted = true)
+        // タグ削除は論理削除で見た目はベタ白にする。
+        val deleteTag = Tag(id = id, tagName = "", pattern = R.drawable.bg_pattern1, color = R.color.white, isDeleted = true)
         dao.upsert(deleteTag)
     }
 

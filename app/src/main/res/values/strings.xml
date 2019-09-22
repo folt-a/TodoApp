@@ -24,4 +24,9 @@
     </string>
     <string name="attachment_summary_off">Only download attachments when manually requested</string>
     <string name="tagSettingButton">tagSettingButton</string>
+    <string name="tagSettingButtonTitle">タグ管理</string>
+    <string name="tagSettingButtonSummary">タグの追加、変更が行えます。</string>
+    <string name="prefCategoryTagTitle">タグ</string>
+    <string name="menu_tag_delete_tag_title">deleteTag</string>
+    <string name="holder_tag_text_view">タグ</string>
 </resources>

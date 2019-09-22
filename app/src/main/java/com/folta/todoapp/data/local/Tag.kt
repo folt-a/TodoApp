@@ -7,7 +7,7 @@ data class Tag(
     @PrimaryKey(autoGenerate = true)
     val id: Int,
     var tagName: String,
-    var icon: Int,
+    var pattern: Int,
     var color: Int,
     var isDeleted: Boolean = false
 )
