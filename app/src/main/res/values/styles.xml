@@ -27,4 +27,23 @@
         <item name="android:windowTitleSize">0dp</item>
         <item name="android:actionBarSize">0dp</item>
     </style>
+
+    <style name="IconOnlyButton" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="backgroundTint">@color/white</item>
+        <item name="iconTint">@color/colorPrimaryDark</item>
+        <item name="iconPadding">0dp</item>
+        <item name="iconGravity">textStart</item>
+        <item name="rippleColor">@color/colorPrimary</item>
+        <item name="android:shadowColor">@android:color/transparent</item>
+<!--        <item name="strokeColor">@android:color/transparent</item>-->
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetLeft">0dp</item>
+        <item name="android:insetRight">0dp</item>
+        <item name="android:paddingBottom">0dp</item>
+        <item name="android:paddingTop">0dp</item>
+        <item name="android:paddingLeft">0dp</item>
+        <item name="android:paddingRight">0dp</item>
+    </style>
+
 </resources>

@@ -6,13 +6,11 @@ import android.content.Context
 import android.graphics.Shader
 import android.net.Uri
 import android.os.Bundle
-import android.util.TypedValue
 import android.view.*
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.CompoundButton
 import android.widget.TextView
-import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -43,6 +41,8 @@ class ToDoListFragment : Fragment() {
 
     private val tagRepository by inject<TagRepository>()
 
+    private lateinit var menu:Menu
+
     private lateinit var viewToDoList: MutableList<ToDo>
     private lateinit var titleDate: LocalDate
 
@@ -50,6 +50,7 @@ class ToDoListFragment : Fragment() {
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
+        this.menu = menu
         inflater.inflate(R.menu.menu_todo, menu)
     }
 
@@ -57,25 +58,38 @@ class ToDoListFragment : Fragment() {
         super.onOptionsItemSelected(item)
         when (item.itemId) {
             R.id.calendar -> {
-                Toast.makeText(context, "Calender Click!", Toast.LENGTH_SHORT).show()
-                val picker = this.context?.let { it -> DatePickerDialog(it) }
-                picker?.setOnDateSetListener { _, year, month, dayOfMonth ->
-                    titleDate = LocalDate.of(year, month + 1, dayOfMonth)
-                    val formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
-                    (activity as TodoActivity).setActionBarTitle(titleDate.format(formatter))
-                    CoroutineScope(Dispatchers.Main + job).launch {
-                        viewToDoList =
-                            todoRepository.findByDate(titleDate.toStringyyyyMMdd())
-                                .toMutableList()
-                        todoAdapter.items = viewToDoList
-                        todoAdapter.notifyDataSetChanged()
-                    }
-                }
-                picker?.updateDate(titleDate.year, titleDate.monthValue - 1, titleDate.dayOfMonth)
-                picker?.show()
+                onClickCalendarOptionMenu()
+            }
+            R.id.fixToDo -> {
+                closeKeyboard(view)
+            }
+            R.id.deleteButton-> {
+                onClickDeleteOptionMenu()
             }
         }
         return true
+    }
+
+    private fun onClickDeleteOptionMenu() {
+
+    }
+
+    private fun onClickCalendarOptionMenu() {
+        val picker = this.context?.let { it -> DatePickerDialog(it) }
+        picker?.setOnDateSetListener { _, year, month, dayOfMonth ->
+            titleDate = LocalDate.of(year, month + 1, dayOfMonth)
+            val formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
+            (activity as TodoActivity).setActionBarTitle(titleDate.format(formatter))
+            CoroutineScope(Dispatchers.Main + job).launch {
+                viewToDoList =
+                    todoRepository.findByDate(titleDate.toStringyyyyMMdd())
+                        .toMutableList()
+                todoAdapter.items = viewToDoList
+                todoAdapter.notifyDataSetChanged()
+            }
+        }
+        picker?.updateDate(titleDate.year, titleDate.monthValue - 1, titleDate.dayOfMonth)
+        picker?.show()
     }
 
     private fun LocalDate.toStringyyyyMMdd(): String =
@@ -88,7 +102,6 @@ class ToDoListFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_todo_list, container, false)
     }
 
-    @SuppressLint("RestrictedApi")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setHasOptionsMenu(true)
@@ -102,9 +115,7 @@ class ToDoListFragment : Fragment() {
         recycleView.setOnTouchListener { v, event ->
             //            Logger.d(event.action.toString())
             if (event.action == MotionEvent.ACTION_DOWN) {
-                ContextCompat.getSystemService(v.context, InputMethodManager::class.java)
-                    ?.hideSoftInputFromWindow(v?.windowToken, 0)
-                coordinatorLayout.requestFocus()
+                closeKeyboard(v)
             }
             return@setOnTouchListener false
         }
@@ -119,9 +130,7 @@ class ToDoListFragment : Fragment() {
                     if (holder.isShowDetail) {
                         holder.title.requestFocus()
                     } else {
-                        holder.linearLayout.requestFocus()
-                        fab.visibility = View.VISIBLE
-                        holder.inputMethodManager?.hideSoftInputFromWindow(v?.windowToken, 0)
+                    closeKeyboard(v)
                     }
                 }
 
@@ -136,8 +145,7 @@ class ToDoListFragment : Fragment() {
                     holder.title.isFocusable = true
                     holder.title.isFocusableInTouchMode = true
                     holder.title.requestFocus()
-                    fab.visibility = View.GONE
-                    holder.inputMethodManager?.showSoftInput(v, 1)
+                    openKeyboard(v)
                 }
 
                 override fun onTitleFocusChange(
@@ -152,8 +160,7 @@ class ToDoListFragment : Fragment() {
                         CoroutineScope(Dispatchers.Main + job).launch {
                             if (todo != null) todoRepository.save(todo)
                         }
-                        fab.visibility = View.VISIBLE
-                        holder.inputMethodManager?.hideSoftInputFromWindow(v?.windowToken, 0)
+                        closeKeyboard(v)
                         return true
                     }
                 }
@@ -167,8 +174,7 @@ class ToDoListFragment : Fragment() {
                         EditorInfo.IME_ACTION_DONE -> {
                             holder.title.isFocusable = false
                             holder.title.isFocusableInTouchMode = false
-                            fab.visibility = View.VISIBLE
-                            holder.inputMethodManager?.hideSoftInputFromWindow(v?.windowToken, 0)
+                            closeKeyboard(v)
                             return true
                         }
                         else -> {
@@ -212,10 +218,9 @@ class ToDoListFragment : Fragment() {
                     holder.content.fullText = items[holder.adapterPosition].content
                     holder.content.openMemo()
                     holder.content.visibility = View.VISIBLE
-                    holder.detail.setImageResource(R.drawable.ic_detail_selected)
-                    fab.visibility = View.VISIBLE
-                    holder.inputMethodManager?.hideSoftInputFromWindow(v?.windowToken, 0)
+                    holder.detail.setIconResource(R.drawable.ic_detail_selected)
                     holder.isShowDetail = !holder.isShowDetail
+                    closeKeyboard(v)
                 }
 
                 override fun closeContentDetail(v: View?, holder: ToDoViewHolder) {
@@ -225,16 +230,14 @@ class ToDoListFragment : Fragment() {
                     holder.tagSpinner.visibility = View.GONE
                     holder.content.fullText = items[holder.adapterPosition].content
                     holder.content.closeMemo()
-                    holder.detail.setImageResource(R.drawable.ic_detail)
-                    fab.visibility = View.VISIBLE
-                    holder.inputMethodManager?.hideSoftInputFromWindow(v?.windowToken, 0)
+                    holder.detail.setIconResource(R.drawable.ic_detail)
+                    closeKeyboard(v)
                     holder.isShowDetail = !holder.isShowDetail
                 }
 
                 override fun onContentClick(v: View?, holder: ToDoViewHolder) {
                     Logger.d("onContentClick")
-                    fab.visibility = View.GONE
-                    holder.inputMethodManager?.showSoftInput(v, 1)
+                    openKeyboard(v)
                 }
 
                 override fun onContentFocusChange(
@@ -251,8 +254,7 @@ class ToDoListFragment : Fragment() {
                         CoroutineScope(Dispatchers.Main + job).launch {
                             if (todo != null) todoRepository.save(todo)
                         }
-                        fab.visibility = View.VISIBLE
-                        holder.inputMethodManager?.hideSoftInputFromWindow(v?.windowToken, 0)
+                        closeKeyboard(v)
                         return true
                     }
                 }
@@ -271,9 +273,6 @@ class ToDoListFragment : Fragment() {
         )
 
         fab.setOnClickListener {
-            val inputMethodManager =
-                ContextCompat.getSystemService(it!!.context, InputMethodManager::class.java)
-            inputMethodManager?.hideSoftInputFromWindow(it.windowToken, 0)
             val orderId: Int
             if (todoAdapter.itemCount != 0) {
                 orderId = viewToDoList.maxBy { toDo -> toDo.orderId }!!.orderId + 1
@@ -302,11 +301,8 @@ class ToDoListFragment : Fragment() {
         }
 
         coordinatorLayout.setOnTouchListener { v, _ ->
-            val inputMethodManager =
-                ContextCompat.getSystemService(v!!.context, InputMethodManager::class.java)
-            fab.visibility = View.VISIBLE
-            inputMethodManager?.hideSoftInputFromWindow(v.windowToken, 0)
-            coordinatorLayout.requestFocus()
+            closeKeyboard(v)
+            return@setOnTouchListener true
         }
 
         val getRecyclerViewSimpleCallBack =
@@ -354,6 +350,25 @@ class ToDoListFragment : Fragment() {
         itemTouchHelper.attachToRecyclerView(recycleView)
     }
 
+    private fun openKeyboard(view: View?) {
+        fab.hide()
+        menu.findItem(R.id.fixToDo).isVisible = true
+        menu.findItem(R.id.calendar).isVisible = false
+        menu.findItem(R.id.deleteButton).isVisible = false
+        context?.let { ContextCompat.getSystemService(it, InputMethodManager::class.java) }
+            ?.showSoftInput(view, 1)
+    }
+
+    private fun closeKeyboard(view: View?) {
+        coordinatorLayout.requestFocus()
+        fab.show()
+        menu.findItem(R.id.fixToDo).isVisible = false
+        menu.findItem(R.id.calendar).isVisible = true
+        menu.findItem(R.id.deleteButton).isVisible = true
+        context?.let { ContextCompat.getSystemService(it, InputMethodManager::class.java) }
+            ?.hideSoftInputFromWindow(view?.windowToken, 0)
+    }
+
     override fun onAttach(context: Context) {
         super.onAttach(context)
 
@@ -382,20 +397,3 @@ class ToDoListFragment : Fragment() {
         fun onFragmentInteraction(uri: Uri)
     }
 }
-
-//class ToDoDatePickerDialog(
-//    context: Context,
-//    dateSetListener: OnDateSetListener
-//) :
-//    DatePickerDialog(context) {
-//    //    var year: Int
-////    var month: Int
-////    var dayOfMonth: Int
-//    init {
-//        val calendar = Calendar.getInstance()
-//        this.datePicker.maxDate = calendar.timeInMillis
-//        this.setOnDateSetListener { view, year, month, dayOfMonth ->
-//        title
-//        }
-//    }
-//}

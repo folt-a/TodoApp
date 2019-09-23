@@ -46,63 +46,65 @@
                 tools:layout_conversion_wrapHeight="50"
                 tools:layout_conversion_wrapWidth="1038" />
 
-        <Button
+        <TextView
                 android:id="@+id/tagPatternLabel"
                 android:layout_width="wrap_content"
-                android:layout_height="0dp"
+                android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
                 android:background="@color/zero"
                 android:gravity="center"
-                android:paddingStart="8dp"
-                android:paddingEnd="44dp"
                 android:text="パターン"
                 android:textAlignment="center"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/tagColorLabel"
+                app:layout_constraintEnd_toStartOf="@+id/tagPatternSpinner"
                 app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageView
-                android:id="@+id/tagPattern"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:layout_margin="0dp"
-                android:layout_marginEnd="8dp"
-                android:background="@color/white"
-                android:foregroundGravity="left"
-                android:padding="0dp"
-                android:scaleType="centerCrop"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="@+id/tagPatternLabel"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/bg_pattern1" />
+        <Spinner
+                android:id="@+id/tagPatternSpinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
 
-        <Button
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/tagColorLabel"
+                app:layout_constraintTop_toTopOf="parent"
+                />
+
+        <TextView
                 android:id="@+id/tagColorLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
-                android:layout_marginEnd="8dp"
                 android:background="@color/zero"
                 android:gravity="center"
-                android:paddingStart="8dp"
-                android:paddingEnd="32dp"
                 android:text="色"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/tagColorSpinner"
                 app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageView
-                android:id="@+id/tagColor"
-                android:layout_width="24dp"
-                android:layout_height="36dp"
-                android:layout_margin="0dp"
-                android:layout_marginEnd="8dp"
-                android:background="@color/colorPrimary"
-                android:foregroundGravity="left"
-                android:padding="0dp"
-                android:scaleType="centerCrop"
+        <Spinner
+                android:id="@+id/tagColorSpinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="@+id/tagColorLabel"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                />
+
+        <com.google.android.material.button.MaterialButton
+                android:id="@+id/deleteButton"
+                style="@style/IconOnlyButton"
+                android:layout_width="48dp"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Button"
+                android:visibility="gone"
+                app:cornerRadius="12dp"
+                app:icon="@drawable/ic_trash"
+                app:iconTint="@color/alert"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:rippleColor="@color/gray" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

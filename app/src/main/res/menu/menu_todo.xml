@@ -1,13 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto">
-<!--    <item-->
-<!--            android:pattern="@drawable/ic_edit"-->
-<!--            android:title="hogehoge2"-->
-<!--            app:showAsAction="collapseActionView" />-->
+    <!--    <item-->
+    <!--            android:pattern="@drawable/ic_edit"-->
+    <!--            android:title="hogehoge2"-->
+    <!--            app:showAsAction="collapseActionView" />-->
     <item
             android:id="@+id/calendar"
             android:icon="@drawable/ic_calendar"
-            android:title="hogehoge"
+            android:title="カレンダー"
             app:showAsAction="ifRoom" />
+    <item
+            android:id="@+id/deleteButton"
+            android:icon="@drawable/ic_trash"
+            android:title="削除"
+            app:showAsAction="ifRoom" />
+    <item
+            android:id="@+id/fixToDo"
+            android:icon="@drawable/ic_check"
+            android:title="確定"
+            app:showAsAction="ifRoom"
+            android:visible="false"/>
 </menu>

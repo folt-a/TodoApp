@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
-import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.recyclerview.widget.RecyclerView
 import com.folta.todoapp.Logger
@@ -19,6 +18,7 @@ import kotlinx.android.synthetic.main.holder_todo.view.*
 import android.widget.AdapterView
 import android.widget.Spinner
 import android.widget.AdapterView.OnItemSelectedListener
+import com.google.android.material.button.MaterialButton
 
 
 open class ToDoAdapter(
@@ -45,16 +45,13 @@ open class ToDoAdapter(
         }
         val colorResId = tag.color
         val patternResId = tag.pattern
-        val drawable = ContextCompat.getDrawable(holder.todoTag.context, patternResId)
-        drawable?.let {
-            drawable.setTint(holder.todoTag.resources.getColor(colorResId))
-            holder.todoTag.setImageDrawable(TileDrawable(it, Shader.TileMode.REPEAT))
-        }
+        val drawable =  TileDrawable.create(holder.todoTag.context,colorResId,patternResId,Shader.TileMode.REPEAT)
+        holder.todoTag.setImageDrawable(drawable)
         holder.tagSpinner.setSelection(tagList.indexOf(tag), false)
         holder.title.setText(item.title)
         holder.content.fullText = item.content
         holder.content.closeMemo()
-        holder.detail.setImageResource(R.drawable.ic_detail)
+        holder.detail.setIconResource(R.drawable.ic_detail)
         holder.isDone.isChecked = item.isChecked
 //        Logger.d("FULLTEXT::"+holder.content.fullText)
     }
@@ -182,16 +179,13 @@ open class ToDoAdapter(
 
     class ToDoViewHolder(itemView: View) :
         RecyclerView.ViewHolder(itemView) {
-        val inputMethodManager =
-            getSystemService(itemView.context, InputMethodManager::class.java)
-        val linearLayout: LinearLayout = itemView.linearLayout
         val todoTag: ImageView = itemView.todoTag
         val title: EditText = itemView.title
         val content: EditTextMemo = itemView.content
         val tagTextView: TextView = itemView.tagTextView
         val tagSpinner: Spinner = itemView.tagSpinner
         val isDone: CheckBox = itemView.isDone
-        val detail: ImageButton = itemView.detail
+        val detail: MaterialButton = itemView.detail
         var isShowDetail = false
 
 

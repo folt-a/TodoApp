@@ -1,6 +1,7 @@
 package com.folta.todoapp.view.ui.setting.tag
 
 import android.content.Context
+import android.graphics.Shader
 import android.net.Uri
 import android.os.Bundle
 import android.view.*
@@ -10,10 +11,12 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.folta.todoapp.Const
 import com.folta.todoapp.Logger
 import com.folta.todoapp.R
 import com.folta.todoapp.data.local.Tag
 import com.folta.todoapp.data.local.TagRepository
+import com.folta.todoapp.view.ui.TileDrawable
 import com.folta.todoapp.view.ui.setOnSafeClickListener
 
 import kotlinx.android.synthetic.main.fragment_tag_list.*
@@ -86,9 +89,43 @@ class TagFragment : Fragment() {
             Logger.d(viewTagList.toString())
 
             tagAdapter = object : TagAdapter(viewTagList) {
-//                override fun onClick(v: View?, holder: TagViewHolder) {
-//
-//                }
+                private fun onSpinnerSelected(
+                    id: Int,
+                    holder: TagViewHolder,
+                    v: View?
+                ) {
+                    Logger.d("スピナー onItemSelected id = $id")
+                    val tag = getEditedToDo(holder)
+                    CoroutineScope(Dispatchers.Main + job).launch {
+                        if (tag != null) {
+                            tagRepository.save(tag)
+//                            タグ変更されたので描画やりなおし
+                            var tag = viewTagList.firstOrNull { it.id == tag.id }
+//                            タグなし、削除済みタグは未設定タグとして描画する
+                            if (tag == null || tag.isDeleted) {
+                                tag = viewTagList[0]
+                            }
+                            val colorResId = tag.color
+                            val patternResId = tag.pattern
+                            if (v != null) {
+                                val drawable = TileDrawable.create(
+                                    v.context,
+                                    colorResId,
+                                    patternResId,
+                                    Shader.TileMode.REPEAT
+                                )
+                                holder.todoTag.setImageDrawable(drawable)
+                            }
+                            getEditedToDo(holder)
+                        }
+                    }
+                }
+                override fun onColorSpinnerSelected(v: View?, id: Int, holder: TagViewHolder) {
+                    this.onSpinnerSelected(id, holder, v)
+                }
+                override fun onPatternSpinnerSelected(v: View?, id: Int, holder: TagViewHolder) {
+                    this.onSpinnerSelected(id, holder, v)
+                }
             }
             tagAdapter.setHasStableIds(true)
             recycleView.adapter = tagAdapter
@@ -100,22 +137,12 @@ class TagFragment : Fragment() {
                 ContextCompat.getSystemService(it!!.context, InputMethodManager::class.java)
             inputMethodManager?.hideSoftInputFromWindow(it.windowToken, 0)
 
-            val colorArray = arrayOf(
-                R.color.c1,
-                R.color.c2,
-                R.color.c3,
-                R.color.c4,
-                R.color.c5,
-                R.color.c6,
-                R.color.c7
-            )
-
             val tag =
                 Tag(
                     id = 0,
                     tagName = "タグ${tagAdapter.itemCount + 1}",
                     pattern = R.drawable.bg_pattern1,
-                    color = colorArray[Random.nextInt(colorArray.size)]
+                    color = Const.tagColorIdList[Random.nextInt(Const.tagColorIdList.size)]
                 )
             CoroutineScope(Dispatchers.Main + job).launch {
                 val savedId = tagRepository.save(tag)
