@@ -17,7 +17,6 @@ import com.folta.todoapp.data.local.ToDo
 import com.folta.todoapp.view.ui.TileDrawable
 import kotlinx.android.synthetic.main.holder_todo.view.*
 import android.widget.AdapterView
-import android.widget.Toast
 import android.widget.Spinner
 import android.widget.AdapterView.OnItemSelectedListener
 
@@ -51,11 +50,13 @@ open class ToDoAdapter(
             drawable.setTint(holder.todoTag.resources.getColor(colorResId))
             holder.todoTag.setImageDrawable(TileDrawable(it, Shader.TileMode.REPEAT))
         }
-        holder.tagSpinner.setSelection(tagList.indexOf(tag))
+        holder.tagSpinner.setSelection(tagList.indexOf(tag), false)
         holder.title.setText(item.title)
-        holder.content.setMemoText(item.content)
+        holder.content.fullText = item.content
+        holder.content.closeMemo()
+        holder.detail.setImageResource(R.drawable.ic_detail)
         holder.isDone.isChecked = item.isChecked
-        Logger.d(holder.content.fullText)
+//        Logger.d("FULLTEXT::"+holder.content.fullText)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ToDoViewHolder {
@@ -63,7 +64,7 @@ open class ToDoAdapter(
         val view = layoutInflater.inflate(R.layout.holder_todo, parent, false)
         val holder = ToDoViewHolder(view)
 
-//        Spinner
+//        Spinnerアダプターセット
         val spinnerTagAdapter = TagSpinnerAdapter(tagList)
         holder.tagSpinner.adapter = spinnerTagAdapter
         spinnerTagAdapter.notifyDataSetChanged()
@@ -187,6 +188,7 @@ open class ToDoAdapter(
         val todoTag: ImageView = itemView.todoTag
         val title: EditText = itemView.title
         val content: EditTextMemo = itemView.content
+        val tagTextView: TextView = itemView.tagTextView
         val tagSpinner: Spinner = itemView.tagSpinner
         val isDone: CheckBox = itemView.isDone
         val detail: ImageButton = itemView.detail

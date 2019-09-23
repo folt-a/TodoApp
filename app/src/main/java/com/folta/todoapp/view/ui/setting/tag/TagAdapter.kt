@@ -66,7 +66,7 @@ open class TagAdapter(var items: List<Tag>) : RecyclerView.Adapter<TagAdapter.Ta
         RecyclerView.ViewHolder(itemView) {
         val linearLayout: LinearLayout = itemView.linearLayout
         val todoTag: ImageView = itemView.todoTag
-        val tagName: EditText = itemView.tagName
+        val tagName: EditText = itemView.tagName_selected
         val tagPattern: ImageView = itemView.tagPattern
         val tagColor: ImageView = itemView.tagColor
     }

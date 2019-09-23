@@ -59,36 +59,35 @@
                 app:layout_constraintBottom_toBottomOf="@+id/isDone"
                 app:layout_constraintEnd_toStartOf="@+id/detail"
                 app:layout_constraintStart_toEndOf="@+id/isDone"
-                app:layout_constraintTop_toTopOf="@+id/isDone"
-                tools:layout_conversion_wrapHeight="50"
-                tools:layout_conversion_wrapWidth="1038" />
+                app:layout_constraintTop_toTopOf="@+id/isDone" />
 
-            <TextView
-                    android:id="@+id/tagTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
-                    android:text="@string/holder_tag_text_view"
-                    android:textSize="16sp"
-                    app:layout_constraintStart_toEndOf="@id/todoTag"
-                    app:layout_constraintTop_toBottomOf="@+id/isDone" />
+        <TextView
+                android:id="@+id/tagTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/holder_tag_text_view"
+                android:textSize="16sp"
+                app:layout_constraintStart_toEndOf="@id/todoTag"
+                app:layout_constraintTop_toBottomOf="@+id/isDone"
+                android:visibility="gone"
+                />
 
-            <Spinner
-                    android:id="@+id/tagSpinner"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:entries="@array/memo_open_entries"
-
-                    app:layout_constraintBottom_toBottomOf="@+id/tagTextView"
-                    app:layout_constraintStart_toEndOf="@id/tagTextView"
-                    app:layout_constraintTop_toTopOf="@+id/tagTextView" />
+        <Spinner
+                android:id="@+id/tagSpinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="@+id/tagTextView"
+                app:layout_constraintStart_toEndOf="@id/tagTextView"
+                app:layout_constraintTop_toTopOf="@+id/tagTextView"
+                android:visibility="gone"
+                 />
 
         <com.folta.todoapp.view.ui.todo.EditTextMemo
                 android:id="@+id/content"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-
                 android:layout_marginStart="8dp"
                 android:background="#00000000"
                 android:enabled="false"
@@ -98,9 +97,10 @@
                 android:inputType="textMultiLine"
                 android:textColor="#999999"
                 android:textSize="10sp"
+                android:visibility="visible"
                 app:layout_constraintEnd_toEndOf="@+id/title"
                 app:layout_constraintStart_toEndOf="@id/todoTag"
-                app:layout_constraintTop_toBottomOf="@+id/tagSpinner"
+                app:layout_constraintTop_toBottomOf="@+id/tagTextView"
                 tools:layout_conversion_wrapHeight="43"
                 tools:layout_conversion_wrapWidth="1038" />
 

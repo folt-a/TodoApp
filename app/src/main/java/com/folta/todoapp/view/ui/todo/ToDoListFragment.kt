@@ -3,6 +3,7 @@ package com.folta.todoapp.view.ui.todo
 import android.annotation.SuppressLint
 import android.app.DatePickerDialog
 import android.content.Context
+import android.graphics.Shader
 import android.net.Uri
 import android.os.Bundle
 import android.util.TypedValue
@@ -15,15 +16,17 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.folta.todoapp.Logger
 import com.folta.todoapp.R
 import com.folta.todoapp.data.local.TagRepository
 import com.folta.todoapp.data.local.ToDo
 import com.folta.todoapp.data.local.ToDoRepository
 import com.folta.todoapp.view.TodoActivity
+import com.folta.todoapp.view.ui.TileDrawable
 import kotlinx.android.synthetic.main.fragment_todo_list.*
-import kotlinx.android.synthetic.main.holder_todo.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -178,77 +181,51 @@ class ToDoListFragment : Fragment() {
                     Logger.d("スピナー onItemSelected id = $id")
                     val todo = getEditedToDo(holder)
                     CoroutineScope(Dispatchers.Main + job).launch {
-                        if (todo != null) todoRepository.save(todo)
+                        if (todo != null) {
+                            todoRepository.save(todo)
+
+//                        タグ変更されたので描画やりなおし
+                            var tag = tagList.firstOrNull { it.id == todo.tagId }
+//                        タグなし、削除済みタグは未設定タグとして描画する
+                            if (tag == null || tag.isDeleted) {
+                                tag = tagList[0]
+                            }
+                            val colorResId = tag.color
+                            val patternResId = tag.pattern
+                            if (v != null) {
+                                val drawable = TileDrawable.create(
+                                    v.context,
+                                    colorResId,
+                                    patternResId,
+                                    Shader.TileMode.REPEAT
+                                )
+                                holder.todoTag.setImageDrawable(drawable)
+                            }
+
+                        }
                     }
-//                    タグ変更されたので描画やりなおし
-                    onBindViewHolder(holder, holder.adapterPosition)
                 }
 
                 override fun showContentDetail(v: View?, holder: ToDoViewHolder) {
-                    //        contentを全文表示する
-                    holder.content.setText(items[holder.adapterPosition].content)
-                    holder.content.setBackgroundResource(R.drawable.edittext_content)
-                    v?.let {
-                        holder.content.setPadding(
-                            v.context.resources.getDimensionPixelSize(R.dimen.dp8),
-                            v.context.resources.getDimensionPixelSize(R.dimen.dp8),
-                            v.context.resources.getDimensionPixelSize(R.dimen.dp8),
-                            v.context.resources.getDimensionPixelSize(R.dimen.dp8)
-                        )
-                    }
-                    holder.content.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
-                    val mlp = holder.itemView.content.layoutParams
-                    if (mlp is ViewGroup.MarginLayoutParams) {
-                        v?.let {
-                            mlp.setMargins(
-                                v.context.resources.getDimensionPixelSize(R.dimen.dp8),
-                                v.context.resources.getDimensionPixelSize(R.dimen.dp8),
-                                0,
-                                0
-                            )
-                        }
-                    }
-                    holder.detail.setImageResource(R.drawable.ic_detail_selected)
+                    holder.tagTextView.visibility = View.VISIBLE
+                    holder.tagSpinner.visibility = View.VISIBLE
+                    holder.content.fullText = items[holder.adapterPosition].content
+                    holder.content.openMemo()
                     holder.content.visibility = View.VISIBLE
-                    holder.content.isEnabled = true
-                    holder.content.isFocusable = true
-                    holder.content.isFocusableInTouchMode = true
+                    holder.detail.setImageResource(R.drawable.ic_detail_selected)
                     fab.visibility = View.VISIBLE
                     holder.inputMethodManager?.hideSoftInputFromWindow(v?.windowToken, 0)
                     holder.isShowDetail = !holder.isShowDetail
                 }
 
                 override fun closeContentDetail(v: View?, holder: ToDoViewHolder) {
-                    Logger.d("closeContentDetail")
                     onContentFocusChange(v, false, holder)
-//      本文は改行削除＋入らない部分は非表示にする
-                    val pos = holder.adapterPosition
-                    holder.content.setMemoText(items[pos].content)
 
-                    holder.content.background = null
-                    holder.content.setPadding(
-                        0,
-                        0,
-                        0,
-                        0
-                    )
-                    holder.content.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10f)
-                    val mlp = holder.content.layoutParams
-                    if (mlp is ViewGroup.MarginLayoutParams) {
-                        v?.let {
-                            mlp.setMargins(
-                                v.context.resources.getDimensionPixelSize(R.dimen.dp8),
-                                0,
-                                0,
-                                0
-                            )
-                        }
-                    }
+                    holder.tagTextView.visibility = View.GONE
+                    holder.tagSpinner.visibility = View.GONE
+                    holder.content.fullText = items[holder.adapterPosition].content
+                    holder.content.closeMemo()
                     holder.detail.setImageResource(R.drawable.ic_detail)
-
-                    holder.content.isEnabled = false
-                    holder.content.isFocusable = false
-                    holder.content.isFocusableInTouchMode = false
                     fab.visibility = View.VISIBLE
                     holder.inputMethodManager?.hideSoftInputFromWindow(v?.windowToken, 0)
                     holder.isShowDetail = !holder.isShowDetail
@@ -332,33 +309,49 @@ class ToDoListFragment : Fragment() {
             coordinatorLayout.requestFocus()
         }
 
-//        val getRecyclerViewSimpleCallBack =
-//            // 引数で、上下のドラッグ、および左方向のスワイプを有効にしている。
-//            object : ItemTouchHelper.SimpleCallback(
-//                ItemTouchHelper.UP or ItemTouchHelper.DOWN,
-//                ItemTouchHelper.LEFT
-//            ) {
-//                override fun onMove(
-//                    recyclerView: RecyclerView,
-//                    viewHolder: RecyclerView.ViewHolder,
-//                    target: RecyclerView.ViewHolder
-//                ): Boolean {
-//                    val fromPosition = viewHolder.adapterPosition
-//                    val toPosition = target.adapterPosition
-//
-//                    viewToDoList.add(toPosition, viewToDoList.removeAt(fromPosition))
-//                    todoAdapter.notifyItemMoved(fromPosition, toPosition)
-//                    return true
-//                }
-//
-//                // スワイプしたとき
-//                override fun onSwiped(p0: RecyclerView.ViewHolder, p1: Int) {
+        val getRecyclerViewSimpleCallBack =
+            // 引数で、上下のドラッグ、および左方向のスワイプを有効にしている。
+            object : ItemTouchHelper.SimpleCallback(
+                ItemTouchHelper.UP or ItemTouchHelper.DOWN,
+                ItemTouchHelper.ANIMATION_TYPE_SWIPE_CANCEL
+            ) {
+                override fun onMove(
+                    recyclerView: RecyclerView,
+                    viewHolder: RecyclerView.ViewHolder,
+                    target: RecyclerView.ViewHolder
+                ): Boolean {
+                    val fromPosition = viewHolder.adapterPosition
+                    val toPosition = target.adapterPosition
+
+                    viewToDoList.add(toPosition, viewToDoList.removeAt(fromPosition))
+                    todoAdapter.notifyItemMoved(fromPosition, toPosition)
+                    return true
+                }
+
+                override fun getMovementFlags(
+                    recyclerView: RecyclerView,
+                    viewHolder: RecyclerView.ViewHolder
+                ): Int {
+                    return makeMovementFlags(
+                        ItemTouchHelper.UP or ItemTouchHelper.DOWN,
+                        0
+                    )
+                }
+
+                // スワイプしたとき
+                override fun onSwiped(p0: RecyclerView.ViewHolder, p1: Int) {
 //                    p0.let {
 //                        CoroutineScope(Dispatchers.Main + job).launch {
 //                            // 実データセットからアイテムを削除
 //                            todoRepository.delete(todoAdapter.items[p0.adapterPosition].id)
 //                            Logger.d("delete : ${todoAdapter.items[p0.adapterPosition].id}")
-//                            viewToDoList.removeAt(p0r
+//                            viewToDoList.removeAt(p0.adapterPosition)
+//                        }
+//                    }
+                }
+            }
+        val itemTouchHelper = ItemTouchHelper(getRecyclerViewSimpleCallBack)
+        itemTouchHelper.attachToRecyclerView(recycleView)
     }
 
     override fun onAttach(context: Context) {
@@ -376,10 +369,6 @@ class ToDoListFragment : Fragment() {
         CoroutineScope(Dispatchers.Main + job).launch {
             todoRepository.saveSort(viewToDoList)
             Logger.d("List Saved!!")
-
-            viewToDoList = todoRepository.findByDate(titleDate.toStringyyyyMMdd()).toMutableList()
-            todoAdapter.items = viewToDoList
-            todoAdapter.notifyDataSetChanged()
         }
         super.onStop()
     }
