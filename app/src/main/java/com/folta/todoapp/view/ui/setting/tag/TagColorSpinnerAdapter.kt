@@ -13,15 +13,16 @@ import kotlinx.android.synthetic.main.tag_color_spinner_item.view.*
 class TagColorSpinnerAdapter(private val items: Array<Int>) : BaseAdapter() {
     @SuppressLint("ViewHolder")
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-        val itemView:View
-        if (convertView == null){
+        val itemView: View
+        if (convertView == null) {
             val layoutInflater = LayoutInflater.from(parent?.context)
-            itemView = layoutInflater.inflate(R.layout.tag_color_spinner_item, parent,false)
-        }else{
+            itemView = layoutInflater.inflate(R.layout.tag_color_spinner_item, parent, false)
+        } else {
             itemView = convertView
         }
         val colorId: Int = items[position]
-        val tagPatternDrawable = ContextCompat.getDrawable(itemView.tagColor.context, R.drawable.bg_pattern1)?.mutate()
+        val tagPatternDrawable =
+            ContextCompat.getDrawable(itemView.tagColor.context, R.drawable.bg_pattern1)?.mutate()
         tagPatternDrawable?.let { it ->
             it.setTint(ContextCompat.getColor(itemView.tagColor.context, colorId))
             itemView.tagColor.setImageDrawable(it)
@@ -46,6 +47,6 @@ class TagColorSpinnerAdapter(private val items: Array<Int>) : BaseAdapter() {
     }
 
     override fun getItem(position: Int): Any {
-        return position
+        return items[position]
     }
 }

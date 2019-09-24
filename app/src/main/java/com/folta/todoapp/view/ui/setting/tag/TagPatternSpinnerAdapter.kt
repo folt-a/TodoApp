@@ -36,12 +36,11 @@ class TagPatternSpinnerAdapter(private val items: Array<Int>) : BaseAdapter() {
     }
 
     override fun getItemId(position: Int): Long {
-//        Logger.d("TagPatternSpinnerAdapter getItemId : ${items[position]}")
         return position.toLong()
     }
 
     override fun getCount(): Int {
-        return items.count()
+        return items.size
     }
 
     override fun getItem(position: Int): Any {

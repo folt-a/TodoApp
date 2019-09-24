@@ -19,7 +19,7 @@ class TagSpinnerAdapter(private val items: List<Tag>) : BaseAdapter() {
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
         val layoutInflater = LayoutInflater.from(parent?.context)
         val itemView = layoutInflater.inflate(R.layout.tag_spinner_selected_item, null)
-        itemView.tagName_selected.text = items[position].tagName
+        itemView.tagNameSelected.text = items[position].tagName
         return itemView
     }
 

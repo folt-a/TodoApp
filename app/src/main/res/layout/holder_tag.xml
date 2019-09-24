@@ -31,16 +31,15 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
         <EditText
-                android:id="@+id/tagName_selected"
+                android:id="@+id/tagName"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
                 android:autofillHints="no"
                 android:backgroundTint="#B2DFDB"
-                android:hint="@string/ui_placeholder_title"
                 android:inputType="text"
                 android:textSize="18sp"
-                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/todoTag"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:layout_conversion_wrapHeight="50"
@@ -50,24 +49,22 @@
                 android:id="@+id/tagPatternLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
+                android:layout_marginTop="8dp"
                 android:background="@color/zero"
                 android:gravity="center"
                 android:text="パターン"
                 android:textAlignment="center"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/tagPatternSpinner"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintStart_toStartOf="@+id/tagName"
+                app:layout_constraintTop_toBottomOf="@+id/tagName" />
 
         <Spinner
                 android:id="@+id/tagPatternSpinner"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/tagColorLabel"
-                app:layout_constraintTop_toTopOf="parent"
-                />
+                android:backgroundTint="@color/colorIcon"
+                app:layout_constraintBottom_toBottomOf="@+id/tagPatternLabel"
+                app:layout_constraintStart_toEndOf="@+id/tagPatternLabel"
+                app:layout_constraintTop_toTopOf="@+id/tagPatternLabel" />
 
         <TextView
                 android:id="@+id/tagColorLabel"
@@ -76,19 +73,18 @@
                 android:background="@color/zero"
                 android:gravity="center"
                 android:text="色"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/tagColorSpinner"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintBottom_toBottomOf="@+id/tagPatternSpinner"
+                app:layout_constraintStart_toEndOf="@+id/tagPatternSpinner"
+                app:layout_constraintTop_toTopOf="@+id/tagPatternSpinner" />
 
         <Spinner
                 android:id="@+id/tagColorSpinner"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                />
+                android:backgroundTint="@color/colorIcon"
+                app:layout_constraintBottom_toBottomOf="@+id/tagColorLabel"
+                app:layout_constraintStart_toEndOf="@+id/tagColorLabel"
+                app:layout_constraintTop_toTopOf="@+id/tagColorLabel" />
 
         <com.google.android.material.button.MaterialButton
                 android:id="@+id/deleteButton"

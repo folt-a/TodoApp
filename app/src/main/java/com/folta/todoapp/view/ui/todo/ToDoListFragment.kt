@@ -142,9 +142,9 @@ class ToDoListFragment : Fragment() {
                 }
 
                 override fun onTitleClick(v: View?, holder: ToDoViewHolder) {
-                    holder.title.isFocusable = true
-                    holder.title.isFocusableInTouchMode = true
-                    holder.title.requestFocus()
+//                    holder.title.isFocusable = true
+//                    holder.title.isFocusableInTouchMode = true
+//                    holder.title.requestFocus()
                     openKeyboard(v)
                 }
 
@@ -172,8 +172,8 @@ class ToDoListFragment : Fragment() {
                 ): Boolean {
                     when (actionId) {
                         EditorInfo.IME_ACTION_DONE -> {
-                            holder.title.isFocusable = false
-                            holder.title.isFocusableInTouchMode = false
+//                            holder.title.isFocusable = false
+//                            holder.title.isFocusableInTouchMode = false
                             closeKeyboard(v)
                             return true
                         }

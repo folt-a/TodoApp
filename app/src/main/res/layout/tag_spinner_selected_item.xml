@@ -2,13 +2,15 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
         android:layout_height="match_parent">
 
     <TextView
-            android:id="@+id/tagName_selected"
+            android:id="@+id/tagNameSelected"
             android:layout_width="wrap_content"
-            android:layout_height="24dp" />
+            android:layout_height="24dp"
+            android:gravity="center"
+            android:text="aaaa" />
 
 </LinearLayout>

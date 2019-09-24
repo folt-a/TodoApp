@@ -5,7 +5,9 @@ import android.graphics.Shader
 import android.net.Uri
 import android.os.Bundle
 import android.view.*
+import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
+import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -34,11 +36,14 @@ class TagFragment : Fragment() {
     private lateinit var tagAdapter: TagAdapter
     private val tagRepository by inject<TagRepository>()
 
+    private lateinit var menu: Menu
+
     private lateinit var viewTagList: MutableList<Tag>
     private val job = Job()
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
+        this.menu = menu
         inflater.inflate(R.menu.menu_tag, menu)
     }
 
@@ -89,42 +94,92 @@ class TagFragment : Fragment() {
             Logger.d(viewTagList.toString())
 
             tagAdapter = object : TagAdapter(viewTagList) {
-                private fun onSpinnerSelected(
+                override fun onColorSpinnerSelected(
+                    v: View?,
                     id: Int,
-                    holder: TagViewHolder,
-                    v: View?
+                    position: Int,
+                    holder: TagViewHolder
                 ) {
-                    Logger.d("スピナー onItemSelected id = $id")
-                    val tag = getEditedToDo(holder)
+                    onSpinnerSelected(v, id, position, holder)
+                }
+
+                override fun onPatternSpinnerSelected(
+                    v: View?,
+                    id: Int,
+                    position: Int,
+                    holder: TagViewHolder
+                ) {
+                    onSpinnerSelected(v, id, position, holder)
+                }
+
+                override fun onSpinnerSelected(
+                    v: View?,
+                    id: Int,
+                    position: Int,
+                    holder: TagViewHolder
+                ) {
+                    Logger.d("スピナーA onItemSelected id = $id")
                     CoroutineScope(Dispatchers.Main + job).launch {
+                        val tag = getEditedTag(position, holder)
                         if (tag != null) {
                             tagRepository.save(tag)
+                            Logger.d("tagColor =" + tag.color)
+                            Logger.d("tagPattern =" + tag.pattern)
 //                            タグ変更されたので描画やりなおし
-                            var tag = viewTagList.firstOrNull { it.id == tag.id }
+//                            tag = viewTagList.firstOrNull { it.id == tag.id }
 //                            タグなし、削除済みタグは未設定タグとして描画する
-                            if (tag == null || tag.isDeleted) {
-                                tag = viewTagList[0]
-                            }
+//                            if (tag == null || tag.isDeleted) {
+//                                tag = viewTagList[0]
+//                            }
                             val colorResId = tag.color
                             val patternResId = tag.pattern
                             if (v != null) {
-                                val drawable = TileDrawable.create(
-                                    v.context,
-                                    colorResId,
-                                    patternResId,
-                                    Shader.TileMode.REPEAT
-                                )
+                                val drawable = TileDrawable.create(v.context, colorResId, patternResId, Shader.TileMode.REPEAT)
                                 holder.todoTag.setImageDrawable(drawable)
                             }
-                            getEditedToDo(holder)
+//                            tag = getEditedTag(holder)
+//                            CoroutineScope(Dispatchers.Main + job).launch {
+//                                if (tag != null) tagRepository.save(tag)
+//                            }
                         }
                     }
                 }
-                override fun onColorSpinnerSelected(v: View?, id: Int, holder: TagViewHolder) {
-                    this.onSpinnerSelected(id, holder, v)
+
+                override fun onTagNameClick(v: View?, holder: TagViewHolder) {
+                    openKeyboard(v)
                 }
-                override fun onPatternSpinnerSelected(v: View?, id: Int, holder: TagViewHolder) {
-                    this.onSpinnerSelected(id, holder, v)
+
+                override fun onTagNameEditorAction(
+                    v: TextView?,
+                    actionId: Int,
+                    holder: TagViewHolder
+                ): Boolean {
+                    when (actionId) {
+                        EditorInfo.IME_ACTION_DONE -> {
+                            closeKeyboard(v)
+                            return true
+                        }
+                        else -> {
+                            return false
+                        }
+                    }
+                }
+
+                override fun onTagNameFocusChange(
+                    v: View?,
+                    hasFocus: Boolean,
+                    holder: TagViewHolder
+                ): Boolean {
+                    if (hasFocus) {
+                        return holder.tagName.performClick()
+                    } else {
+                        val todo = getEditedTagName(holder)
+                        CoroutineScope(Dispatchers.Main + job).launch {
+                            if (todo != null) tagRepository.save(todo)
+                        }
+                        closeKeyboard(v)
+                        return true
+                    }
                 }
             }
             tagAdapter.setHasStableIds(true)
@@ -153,6 +208,23 @@ class TagFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private fun openKeyboard(view: View?) {
+        fab.hide()
+        menu.findItem(R.id.fixToDo).isVisible = true
+        menu.findItem(R.id.deleteButton).isVisible = false
+        context?.let { ContextCompat.getSystemService(it, InputMethodManager::class.java) }
+            ?.showSoftInput(view, 1)
+    }
+
+    private fun closeKeyboard(view: View?) {
+        coordinatorLayout.requestFocus()
+        fab.show()
+        menu.findItem(R.id.fixToDo).isVisible = false
+        menu.findItem(R.id.deleteButton).isVisible = true
+        context?.let { ContextCompat.getSystemService(it, InputMethodManager::class.java) }
+            ?.hideSoftInputFromWindow(view?.windowToken, 0)
     }
 
     override fun onAttach(context: Context) {

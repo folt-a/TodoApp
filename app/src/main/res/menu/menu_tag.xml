@@ -8,4 +8,10 @@
             android:iconTint="@color/alert"
             android:title="@string/menu_tag_delete_tag_title"
             app:showAsAction="ifRoom" />
+    <item
+            android:id="@+id/fixToDo"
+            android:icon="@drawable/ic_check"
+            android:title="確定"
+            app:showAsAction="ifRoom"
+            android:visible="false"/>
 </menu>

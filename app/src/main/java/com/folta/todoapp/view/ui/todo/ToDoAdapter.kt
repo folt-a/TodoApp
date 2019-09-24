@@ -47,7 +47,10 @@ open class ToDoAdapter(
         val patternResId = tag.pattern
         val drawable =  TileDrawable.create(holder.todoTag.context,colorResId,patternResId,Shader.TileMode.REPEAT)
         holder.todoTag.setImageDrawable(drawable)
+        val listener = holder.tagSpinner.onItemSelectedListener
+        holder.tagSpinner.onItemSelectedListener = null
         holder.tagSpinner.setSelection(tagList.indexOf(tag), false)
+        holder.tagSpinner.onItemSelectedListener = listener
         holder.title.setText(item.title)
         holder.content.fullText = item.content
         holder.content.closeMemo()
