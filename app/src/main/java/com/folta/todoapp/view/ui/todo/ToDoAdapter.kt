@@ -5,9 +5,7 @@ import android.graphics.Shader
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
 import android.widget.*
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.recyclerview.widget.RecyclerView
 import com.folta.todoapp.Logger
 import com.folta.todoapp.R
@@ -15,9 +13,6 @@ import com.folta.todoapp.data.local.Tag
 import com.folta.todoapp.data.local.ToDo
 import com.folta.todoapp.view.ui.TileDrawable
 import kotlinx.android.synthetic.main.holder_todo.view.*
-import android.widget.AdapterView
-import android.widget.Spinner
-import android.widget.AdapterView.OnItemSelectedListener
 import com.google.android.material.button.MaterialButton
 
 
@@ -45,53 +40,18 @@ open class ToDoAdapter(
         }
         val colorResId = tag.color
         val patternResId = tag.pattern
-        val drawable =  TileDrawable.create(holder.todoTag.context,colorResId,patternResId,Shader.TileMode.REPEAT)
+        val drawable = TileDrawable.create(
+            holder.todoTag.context,
+            colorResId,
+            patternResId,
+            Shader.TileMode.REPEAT
+        )
         holder.todoTag.setImageDrawable(drawable)
-        val listener = holder.tagSpinner.onItemSelectedListener
-        holder.tagSpinner.onItemSelectedListener = null
+//        val spinnerListener = holder.tagSpinner.onItemSelectedListener
+//        holder.tagSpinner.onItemSelectedListener = null
         holder.tagSpinner.setSelection(tagList.indexOf(tag), false)
-        holder.tagSpinner.onItemSelectedListener = listener
-        holder.title.setText(item.title)
-        holder.content.fullText = item.content
-        holder.content.closeMemo()
-        holder.detail.setIconResource(R.drawable.ic_detail)
-        holder.isDone.isChecked = item.isChecked
-//        Logger.d("FULLTEXT::"+holder.content.fullText)
-    }
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ToDoViewHolder {
-        val layoutInflater = LayoutInflater.from(parent.context)
-        val view = layoutInflater.inflate(R.layout.holder_todo, parent, false)
-        val holder = ToDoViewHolder(view)
-
-//        Spinnerアダプターセット
-        val spinnerTagAdapter = TagSpinnerAdapter(tagList)
-        holder.tagSpinner.adapter = spinnerTagAdapter
-        spinnerTagAdapter.notifyDataSetChanged()
-
-//        listenerをセットする
-        with(holder.itemView) {
-            setOnClickListener { v ->
-                onClick(v, holder)
-            }
-
-            isDone.setOnCheckedChangeListener { v, _ ->
-                onDoneCheck(v, holder)
-            }
-
-            title.setOnClickListener { v ->
-                onTitleClick(v, holder)
-            }
-
-            title.setOnEditorActionListener { v, actionId, _ ->
-                onTitleEditorAction(v, actionId, holder)
-            }
-
-            title.setOnFocusChangeListener { v, hasFocus ->
-                if (onTitleFocusChange(v, hasFocus, holder)) return@setOnFocusChangeListener
-            }
-
-            tagSpinner.onItemSelectedListener = object : OnItemSelectedListener {
+        holder.tagSpinner.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
                 //Spinnerのドロップダウンアイテムが選択された時
                 override fun onItemSelected(
                     parent: AdapterView<*>?,
@@ -104,6 +64,48 @@ open class ToDoAdapter(
 
                 //Spinnerのドロップダウンアイテムが選択されなかった時
                 override fun onNothingSelected(parent: AdapterView<*>) {}
+            }
+        holder.title.setText(item.title)
+        holder.content.fullText = item.content
+        holder.content.closeMemo()
+        holder.detail.setIconResource(R.drawable.ic_detail)
+        holder.isDone.setOnCheckedChangeListener { v, _ ->
+            onDoneCheck(v, holder)
+        }
+        holder.isDone.isChecked = item.isChecked
+//        Logger.d("FULLTEXT::"+holder.content.fullText)
+    }
+
+    private val tagSpinnerAdapter: TagSpinnerAdapter = TagSpinnerAdapter(tagList)
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ToDoViewHolder {
+        val layoutInflater = LayoutInflater.from(parent.context)
+        val view = layoutInflater.inflate(R.layout.holder_todo, parent, false)
+        val holder = ToDoViewHolder(view)
+
+//        Spinnerアダプターセット
+//        val spinnerTagAdapter = tagSpinnerAdapter
+        holder.tagSpinner.adapter = tagSpinnerAdapter
+//        spinnerTagAdapter.notifyDataSetChanged()
+
+//        listenerをセットする
+        with(holder.itemView) {
+            setOnClickListener { v ->
+                onClick(v, holder)
+            }
+
+
+
+            title.setOnClickListener { v ->
+                onTitleClick(v, holder)
+            }
+
+            title.setOnEditorActionListener { v, actionId, _ ->
+                onTitleEditorAction(v, actionId, holder)
+            }
+
+            title.setOnFocusChangeListener { v, hasFocus ->
+                if (onTitleFocusChange(v, hasFocus, holder)) return@setOnFocusChangeListener
             }
 
             content.setOnClickListener { v ->

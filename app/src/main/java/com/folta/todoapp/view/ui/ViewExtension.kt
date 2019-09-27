@@ -6,7 +6,7 @@ private var clickTime: Long = 0
 
 fun <T : View> T.setOnSafeClickListener(block: (T) -> Unit) {
     this.setOnClickListener { view ->
-        if (System.currentTimeMillis() - clickTime < 1000) {
+        if (System.currentTimeMillis() - clickTime < 500) {
             return@setOnClickListener
         }
         @Suppress("UNCHECKED_CAST")

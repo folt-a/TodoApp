@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import androidx.core.content.ContextCompat
-import com.folta.todoapp.Logger
 import com.folta.todoapp.R
 import kotlinx.android.synthetic.main.tag_color_spinner_item.view.*
 

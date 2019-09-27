@@ -41,9 +41,7 @@
                 android:inputType="text"
                 android:textSize="18sp"
                 app:layout_constraintStart_toEndOf="@+id/todoTag"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:layout_conversion_wrapHeight="50"
-                tools:layout_conversion_wrapWidth="1038" />
+                app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
                 android:id="@+id/tagPatternLabel"

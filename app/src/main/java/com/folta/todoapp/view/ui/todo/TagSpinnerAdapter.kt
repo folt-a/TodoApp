@@ -17,15 +17,25 @@ class TagSpinnerAdapter(private val items: List<Tag>) : BaseAdapter() {
 
     @SuppressLint("ViewHolder")
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-        val layoutInflater = LayoutInflater.from(parent?.context)
-        val itemView = layoutInflater.inflate(R.layout.tag_spinner_selected_item, null)
+        val itemView:View
+        if (convertView == null) {
+            val layoutInflater = LayoutInflater.from(parent?.context)
+            itemView = layoutInflater.inflate(R.layout.tag_spinner_selected_item, parent, false)
+        } else {
+            itemView = convertView
+        }
         itemView.tagNameSelected.text = items[position].tagName
         return itemView
     }
 
     override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup?): View {
-        val layoutInflater = LayoutInflater.from(parent?.context)
-        val itemView = layoutInflater.inflate(R.layout.tag_spinner_item, null)
+        val itemView:View
+        if (convertView == null) {
+            val layoutInflater = LayoutInflater.from(parent?.context)
+            itemView = layoutInflater.inflate(R.layout.tag_spinner_item, parent, false)
+        } else {
+            itemView = convertView
+        }
         val holder = TagSpinnerViewHolder(itemView)
 
         val tag: Tag = items[position]

@@ -12,7 +12,8 @@ class TagRepositoryLocal : TagRepository {
                 tagName = "タグ1",
                 pattern = R.drawable.bg_pattern7,
                 color = R.color.c1
-            ),
+            )
+            ,
             Tag(
                 id = 0,
                 tagName = "タグ2",

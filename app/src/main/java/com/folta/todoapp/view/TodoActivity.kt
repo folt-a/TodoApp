@@ -17,7 +17,7 @@ import com.folta.todoapp.view.ui.setting.tag.TagFragment
 import com.folta.todoapp.view.ui.todo.ToDoListFragment
 import kotlinx.android.synthetic.main.activity_todo.*
 
-class TodoActivity : AppCompatActivity(), ToDoListFragment.OnFragmentInteractionListener ,TagFragment.OnListFragmentInteractionListener{
+class TodoActivity : AppCompatActivity(), ToDoListFragment.OnFragmentInteractionListener ,TagFragment.OnFragmentInteractionListener{
     override fun onFragmentInteraction(uri: Uri) {
 
     }

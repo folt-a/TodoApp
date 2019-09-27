@@ -19,7 +19,7 @@ open class TagAdapter(var items: List<Tag>) : RecyclerView.Adapter<TagAdapter.Ta
         val item = items[position]
 
         if (item.isDeleted) return
-
+        // TODO VectorをRepeat生成する処理キャッシュしたい
         val drawable = TileDrawable.create(
             holder.todoTag.context,
             item.color,
@@ -28,18 +28,46 @@ open class TagAdapter(var items: List<Tag>) : RecyclerView.Adapter<TagAdapter.Ta
         )
         holder.todoTag.setImageDrawable(drawable)
 
-//        val tmpColorLister = holder.tagColorSpinner.onItemSelectedListener
-//        holder.tagColorSpinner.onItemSelectedListener = null
+        // Listenerセットの前に値変更 TODO 重いかな？
         holder.tagColorSpinner.setSelection(Const.tagColorIdList.indexOf(item.color), false)
-//        holder.tagColorSpinner.onItemSelectedListener = tmpColorLister
-
-//        val tmpPatternLister = holder.tagPatternSpinner.onItemSelectedListener
-//        holder.tagPatternSpinner.onItemSelectedListener = null
         holder.tagPatternSpinner.setSelection(Const.tagPatternIdList.indexOf(item.pattern), false)
-//        holder.tagPatternSpinner.onItemSelectedListener = tmpPatternLister
+        holder.tagPatternSpinner.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                //Spinnerのドロップダウンアイテムが選択された時
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
+                    onPatternSpinnerSelected(view, id.toInt(), position, holder)
+                }
+
+                //Spinnerのドロップダウンアイテムが選択されなかった時
+                override fun onNothingSelected(parent: AdapterView<*>) {}
+            }
+
+        holder.tagColorSpinner.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                //Spinnerのドロップダウンアイテムが選択された時
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
+                    onColorSpinnerSelected(view, id.toInt(), position, holder)
+                }
+
+                //Spinnerのドロップダウンアイテムが選択されなかった時
+                override fun onNothingSelected(parent: AdapterView<*>) {}
+            }
 
         holder.tagName.setText(item.tagName)
     }
+
+    private val tagColorAdapter = TagColorSpinnerAdapter(Const.tagColorIdList)
+    private val tagPatternAdapter = TagPatternSpinnerAdapter(Const.tagPatternIdList)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TagViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
@@ -47,13 +75,8 @@ open class TagAdapter(var items: List<Tag>) : RecyclerView.Adapter<TagAdapter.Ta
         val holder = TagViewHolder(view)
 
         //        Spinnerアダプターセット
-        val spinnerTagColorAdapter = TagColorSpinnerAdapter(Const.tagColorIdList)
-        holder.tagColorSpinner.adapter = spinnerTagColorAdapter
-        spinnerTagColorAdapter.notifyDataSetChanged()
-
-        val spinnerTagPatternAdapter = TagPatternSpinnerAdapter(Const.tagPatternIdList)
-        holder.tagPatternSpinner.adapter = spinnerTagPatternAdapter
-        spinnerTagPatternAdapter.notifyDataSetChanged()
+        holder.tagColorSpinner.adapter = tagColorAdapter
+        holder.tagPatternSpinner.adapter = tagPatternAdapter
 
 //        listenerをセットする
         with(holder.itemView) {
@@ -70,37 +93,8 @@ open class TagAdapter(var items: List<Tag>) : RecyclerView.Adapter<TagAdapter.Ta
                 if (onTagNameFocusChange(v, hasFocus, holder)) return@setOnFocusChangeListener
             }
 
-            tagPatternSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                //Spinnerのドロップダウンアイテムが選択された時
-                override fun onItemSelected(
-                    parent: AdapterView<*>?,
-                    view: View?,
-                    position: Int,
-                    id: Long
-                ) {
-                    onPatternSpinnerSelected(view, id.toInt(), position, holder)
-                }
-
-                //Spinnerのドロップダウンアイテムが選択されなかった時
-                override fun onNothingSelected(parent: AdapterView<*>) {}
-            }
-
-            tagColorSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                //Spinnerのドロップダウンアイテムが選択された時
-                override fun onItemSelected(
-                    parent: AdapterView<*>?,
-                    view: View?,
-                    position: Int,
-                    id: Long
-                ) {
-                    onColorSpinnerSelected(view, id.toInt(), position, holder)
-                }
-
-                //Spinnerのドロップダウンアイテムが選択されなかった時
-                override fun onNothingSelected(parent: AdapterView<*>) {}
-            }
         }
-        return TagViewHolder(view)
+        return holder
     }
 
     open fun onTagNameFocusChange(v: View?, hasFocus: Boolean, holder: TagViewHolder): Boolean {
@@ -128,25 +122,18 @@ open class TagAdapter(var items: List<Tag>) : RecyclerView.Adapter<TagAdapter.Ta
         return items[position].id.toLong()
     }
 
-    internal fun getEditedTagName(holder: TagViewHolder): Tag? {
-        val item = items.getOrNull(holder.adapterPosition)
-        item?.tagName = holder.tagName.text.toString()
-        return item
-    }
-
-    internal fun getEditedTag(pos: Int, holder: TagViewHolder): Tag? {
-        holder.adapterPosition
-        val item = items.getOrNull(pos)
+    internal fun getEditedTag(holder: TagViewHolder): Tag {
+        val item = items[holder.adapterPosition]
         Logger.d("holder.adapterPosition = " + holder.adapterPosition.toString())
-        Logger.d("pos = " + pos.toString())
         Logger.d("color = " + holder.tagColorSpinner.selectedItem.toString())
         Logger.d("pattern = " + holder.tagPatternSpinner.selectedItem.toString())
-        item?.color = holder.tagColorSpinner.selectedItem as Int
-        item?.pattern = holder.tagPatternSpinner.selectedItem as Int
+        item.tagName = holder.tagName.text.toString()
+        item.color = holder.tagColorSpinner.selectedItem as Int
+        item.pattern = holder.tagPatternSpinner.selectedItem as Int
         return item
     }
 
-    inner class TagViewHolder(itemView: View) :
+    class TagViewHolder(itemView: View) :
         RecyclerView.ViewHolder(itemView) {
         val todoTag: ImageView = itemView.todoTag
         val tagName: EditText = itemView.tagName
