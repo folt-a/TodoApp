@@ -1,0 +1,31 @@
+<PreferenceScreen
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="ToDo">
+
+        <ListPreference
+                app:defaultValue="true"
+                app:entries="@array/memo_open_entries"
+                app:entryValues="@array/memo_open_values"
+                app:key="memoOpen"
+                app:title="閉じているToDoのメモ表示"
+                app:useSimpleSummaryProvider="true" />
+
+        <SwitchPreferenceCompat
+                app:key="notDoneTodoNextDayMove"
+                app:title="☑なしToDo次の日持ちこし"
+                app:summary="本日終了時点で未チェックなToDoを次の日に移動します。" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/prefCategoryTagTitle">
+
+        <Preference
+                app:key="@string/tagSettingButton"
+                app:summary="@string/tagSettingButtonSummary"
+                app:title="@string/tagSettingButtonTitle" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

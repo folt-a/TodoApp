@@ -2,11 +2,6 @@ package com.folta.todoapp.data.local
 
 import androidx.room.*
 
-@Database(entities = [ToDo::class], version = 3)
-abstract class MyDataBase : RoomDatabase() {
-    abstract fun todoDAO(): ToDoDAO
-}
-
 @Entity
 data class ToDo(
     @PrimaryKey(autoGenerate = true)
@@ -15,28 +10,27 @@ data class ToDo(
     var isChecked: Boolean,
     var title: String,
     var content: String,
+    var tagId:Int,
+    // yyyyMMdd
     val createdAt: String
 )
 
 @Dao
 interface ToDoDAO {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun add(todo: ToDo)
+    suspend fun upsert(todo: ToDo)
 
     @Query("select * from ToDo order by orderId")
     suspend fun getAll(): List<ToDo>
 
     @Query("select * from ToDo where id = :id")
-    suspend fun findById(id: Int): ToDo
+    suspend fun findById(id: Int): ToDo?
 
     @Query("select max(id) from ToDo")
     suspend fun getNewestId(): Int
 
-    @Query("select * from ToDo where createdAt = :dateyyyyMMDD order by orderId")
-    suspend fun findByDate(dateyyyyMMDD: String): List<ToDo>
-
-    @Update
-    suspend fun update(todo: ToDo)
+    @Query("select * from ToDo where createdAt = :dateyyyyMMdd order by orderId")
+    suspend fun findByDate(dateyyyyMMdd: String): List<ToDo>
 
     @Transaction
     suspend fun updateViewSort(todos: Iterable<ToDo>) {

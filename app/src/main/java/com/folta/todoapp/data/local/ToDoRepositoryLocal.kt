@@ -1,20 +1,10 @@
 package com.folta.todoapp.data.local
 
-import android.content.Context
-import androidx.room.Room
-import androidx.room.RoomDatabase
-import com.folta.todoapp.Const
-
-class ToDoRepositoryLocal(context: Context) : ToDoRepository {
-    private val dao: ToDoDAO
-
-    init {
-        val db = Room.databaseBuilder(context, MyDataBase::class.java, "todo").build()
-        dao = db.todoDAO()
-    }
+class ToDoRepositoryLocal : ToDoRepository {
+    private val dao: ToDoDAO = MyDataBase.db.todoDAO()
 
     override suspend fun save(todo: ToDo): Int {
-        dao.add(todo)
+        dao.upsert(todo)
         return dao.getNewestId()
     }
 
@@ -26,7 +16,7 @@ class ToDoRepositoryLocal(context: Context) : ToDoRepository {
         dao.delete(id)
     }
 
-    override suspend fun find(Id: Int): ToDo {
+    override suspend fun find(Id: Int): ToDo? {
         return dao.findById(Id)
     }
 
