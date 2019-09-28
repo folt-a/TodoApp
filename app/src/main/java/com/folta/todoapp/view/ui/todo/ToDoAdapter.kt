@@ -186,10 +186,12 @@ open class ToDoAdapter(
                     //Spinnerのドロップダウンアイテムが選択されなかった時
                     override fun onNothingSelected(parent: AdapterView<*>) {}
                 }
+            title.isEnabled = true
             title.setText(todo.title)
             content.fullText = todo.content
             content.closeMemo()
             detail.setIconResource(R.drawable.ic_detail)
+            isDone.isEnabled = true
             isDone.setOnCheckedChangeListener { v, _ ->
                 onDoneCheck(v, this)
             }
