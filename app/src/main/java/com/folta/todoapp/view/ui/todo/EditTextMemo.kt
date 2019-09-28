@@ -87,7 +87,6 @@ class EditTextMemo(context: Context, attrs: AttributeSet) : AppCompatEditText(co
             textState == MemoOpen.OneLine && text.length > 20 -> {
                 this.setText("${text.replace("\n", " ").substring(0..20)}...")
             }
-
             textState == MemoOpen.OneLine -> {
                 this.setText(text.replace("\n", " "))
             }

@@ -47,7 +47,6 @@ class ToDoListFragment : Fragment(), CoroutineScope {
 
     private lateinit var viewToDoList: MutableList<ToDo>
     private lateinit var titleDate: LocalDate
-
     private val job = Job()
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -66,14 +65,24 @@ class ToDoListFragment : Fragment(), CoroutineScope {
                 closeKeyboard(view)
             }
             R.id.deleteButton -> {
-                onClickDeleteOptionMenu()
+                onClickDeleteOptionMenu(item)
             }
         }
         return true
     }
 
-    private fun onClickDeleteOptionMenu() {
-
+    private fun onClickDeleteOptionMenu(menuItem: MenuItem) {
+        when (todoAdapter.state) {
+            ToDoAdapter.ListShowState.NORMAL -> {
+                todoAdapter.state = ToDoAdapter.ListShowState.DELETE
+                menuItem.setIcon(R.drawable.ic_check)
+            }
+            else -> {
+                todoAdapter.state = ToDoAdapter.ListShowState.NORMAL
+                menuItem.setIcon(R.drawable.ic_trash)
+            }
+        }
+        todoAdapter.notifyDataSetChanged()
     }
 
     private fun onClickCalendarOptionMenu() {
@@ -117,7 +126,7 @@ class ToDoListFragment : Fragment(), CoroutineScope {
         (activity as TodoActivity).setActionBarTitle(titleDate.format(formatter))
 
         recycleView.setHasFixedSize(true)
-        recycleView.layoutManager = LinearLayoutManager(this.context)
+        recycleView.layoutManager = LinearLayoutManager(view.context)
 //        recycleView.setOnTouchListener { v, event ->
 //            if (event.action == MotionEvent.ACTION_DOWN) {
 //                closeKeyboard(v)
@@ -199,7 +208,7 @@ class ToDoListFragment : Fragment(), CoroutineScope {
                         Logger.d("スピナー onItemSelected id = $id")
                         val todo = getEditedToDo(holder)
                         if (todo != null) {
-                            launch(job + Dispatchers.IO)  {
+                            launch(job + Dispatchers.IO) {
                                 Logger.d("in IO onSpinnerSelected")
 
                                 todoRepository.save(todo)
@@ -227,6 +236,30 @@ class ToDoListFragment : Fragment(), CoroutineScope {
                         }
                     }
 
+                    override fun onClickDetail(v: View?, holder: ToDoViewHolder) {
+                        if (todoAdapter.state == ListShowState.DELETE) {
+                            onClickDelete(v, holder)
+                            return
+                        }
+                        if (holder.isShowDetail) {
+                            closeContentDetail(v, holder)
+                        } else {
+                            showContentDetail(v, holder)
+                        }
+                    }
+
+                    override fun onClickDelete(v: View?, holder: ToDoViewHolder) {
+                        launch(job + Dispatchers.IO) {
+                            // 実データセットからアイテムを削除
+                            todoRepository.delete(todoAdapter.items[holder.adapterPosition].id)
+                            Logger.d("delete : ${todoAdapter.items[holder.adapterPosition].id}")
+                            viewToDoList.removeAt(holder.adapterPosition)
+                            withContext(Dispatchers.Main) {
+                                todoAdapter.notifyItemRemoved(holder.adapterPosition)
+                            }
+                        }
+                    }
+
                     override fun showContentDetail(v: View?, holder: ToDoViewHolder) {
                         holder.tagTextView.visibility = View.VISIBLE
                         holder.tagSpinner.visibility = View.VISIBLE
@@ -234,7 +267,7 @@ class ToDoListFragment : Fragment(), CoroutineScope {
                         holder.content.openMemo()
                         holder.content.visibility = View.VISIBLE
                         holder.detail.setIconResource(R.drawable.ic_detail_selected)
-                        holder.isShowDetail = !holder.isShowDetail
+                        holder.isShowDetail = true
                         closeKeyboard(v)
                     }
 
@@ -246,8 +279,8 @@ class ToDoListFragment : Fragment(), CoroutineScope {
                         holder.content.fullText = items[holder.adapterPosition].content
                         holder.content.closeMemo()
                         holder.detail.setIconResource(R.drawable.ic_detail)
+                        holder.isShowDetail = false
                         closeKeyboard(v)
-                        holder.isShowDetail = !holder.isShowDetail
                     }
 
                     override fun onContentClick(v: View?, holder: ToDoViewHolder) {
@@ -266,7 +299,7 @@ class ToDoListFragment : Fragment(), CoroutineScope {
                             holder.content.fullText = holder.content.text.toString()
                             Logger.d("onContentFocusChange : $hasFocus")
                             val todo = getEditedToDo(holder)
-                            launch(job + Dispatchers.IO)  {
+                            launch(job + Dispatchers.IO) {
                                 Logger.d("in IO onContentFocusChange ")
 
                                 if (todo != null) todoRepository.save(todo)
@@ -356,17 +389,7 @@ class ToDoListFragment : Fragment(), CoroutineScope {
                 }
 
                 // スワイプしたとき
-                override fun onSwiped(p0: RecyclerView.ViewHolder, p1: Int) {
-//TODO DELETE実装・・・
-//                    p0.let {
-//                        CoroutineScope(Dispatchers.Main + job).launch {
-//                            // 実データセットからアイテムを削除
-//                            todoRepository.delete(todoAdapter.items[p0.adapterPosition].id)
-//                            Logger.d("delete : ${todoAdapter.items[p0.adapterPosition].id}")
-//                            viewToDoList.removeAt(p0.adapterPosition)
-//                        }
-//                    }
-                }
+                override fun onSwiped(p0: RecyclerView.ViewHolder, p1: Int) {}
             }
         val itemTouchHelper = ItemTouchHelper(getRecyclerViewSimpleCallBack)
         itemTouchHelper.attachToRecyclerView(recycleView)

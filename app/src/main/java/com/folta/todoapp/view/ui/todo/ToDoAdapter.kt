@@ -16,11 +16,17 @@ import kotlinx.android.synthetic.main.holder_todo.*
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.holder_todo.view.*
 
-
 open class ToDoAdapter(
     var items: List<ToDo>,
     private val tagList: MutableList<Tag>
 ) : RecyclerView.Adapter<ToDoAdapter.ToDoViewHolder>() {
+
+    enum class ListShowState {
+        NORMAL,
+        DELETE;
+    }
+
+    var state: ListShowState = ListShowState.NORMAL
 
     init {
         tagList.add(
@@ -32,11 +38,16 @@ open class ToDoAdapter(
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: ToDoViewHolder, pos: Int) {
         val item = items[pos]
-        holder.bind(item, tagList)
+        when (state) {
+            ListShowState.DELETE -> holder.bindDelete(item, tagList)
+            ListShowState.NORMAL -> holder.bindNormal(item, tagList)
+        }
+
     }
 
-//    tagSpinnerAdapterのレイアウトは全てのToDoで共通なのでToDoAdapter生成時に固定
+    //    tagSpinnerAdapterのレイアウトは全てのToDoで共通なのでToDoAdapter生成時に固定
     private val tagSpinnerAdapter: TagSpinnerAdapter = TagSpinnerAdapter(tagList)
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ToDoViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
         val view = layoutInflater.inflate(R.layout.holder_todo, parent, false)
@@ -72,11 +83,7 @@ open class ToDoAdapter(
             }
 
             detail.setOnClickListener { v ->
-                if (holder.isShowDetail) {
-                    closeContentDetail(v, holder)
-                } else {
-                    showContentDetail(v, holder)
-                }
+                onClickDetail(v, holder)
             }
         }
 
@@ -131,6 +138,12 @@ open class ToDoAdapter(
     open fun onSpinnerSelected(v: View?, id: Int, holder: ToDoViewHolder) {
     }
 
+    open fun onClickDetail(v: View?, holder: ToDoViewHolder) {
+    }
+
+    open fun onClickDelete(v: View?, holder: ToDoViewHolder) {
+    }
+
     open fun showContentDetail(v: View?, holder: ToDoViewHolder) {
     }
 
@@ -140,8 +153,9 @@ open class ToDoAdapter(
     inner class ToDoViewHolder(override val containerView: View) :
         RecyclerView.ViewHolder(containerView), LayoutContainer {
         var isShowDetail = false
-        fun bind(todo: ToDo, tagList: List<Tag>) {
-            //        todoTag
+
+        fun bindNormal(todo: ToDo, tagList: List<Tag>) {
+            // todoTag
             var tag = tagList.firstOrNull { it.id == todo.tagId }
 //        タグなし、削除済みタグは未設定タグとして描画する
             if (tag == null || tag.isDeleted) {
@@ -179,6 +193,27 @@ open class ToDoAdapter(
             isDone.setOnCheckedChangeListener { v, _ ->
                 onDoneCheck(v, this)
             }
+            isDone.isChecked = todo.isChecked
+        }
+
+        fun bindDelete(todo: ToDo, tagList: List<Tag>) {
+            // todoTag
+            var tag = tagList.firstOrNull { it.id == todo.tagId }
+            //  タグなし、削除済みタグは未設定タグとして描画する
+            if (tag == null || tag.isDeleted) {
+                tag = tagList[0]
+            }
+            val colorResId = tag.color
+            val patternResId = tag.pattern
+            val drawable = TileDrawable.create(todoTag.context, colorResId, patternResId, Shader.TileMode.REPEAT)
+            todoTag.setImageDrawable(drawable)
+            title.isEnabled = false
+            title.setText(todo.title)
+            content.fullText = todo.content
+            content.closeMemo()
+            detail.setIconResource(R.drawable.ic_trash)
+            detail.setIconTintResource(R.color.alert)
+            isDone.isEnabled = false
             isDone.isChecked = todo.isChecked
         }
     }
