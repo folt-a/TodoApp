@@ -24,7 +24,7 @@ class Application : android.app.Application() {
 
     override fun onCreate() {
         super.onCreate()
-
+//        Pref(this.applicationContext).countDebug = 0
 //        起動初期処理
 //        ログ
         Logger.init()

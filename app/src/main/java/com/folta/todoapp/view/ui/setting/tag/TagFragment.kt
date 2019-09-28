@@ -21,6 +21,7 @@ import com.folta.todoapp.data.local.TagRepository
 import com.folta.todoapp.view.ui.TileDrawable
 import com.folta.todoapp.view.ui.setOnSafeClickListener
 import kotlinx.android.synthetic.main.fragment_tag_list.*
+import kotlinx.android.synthetic.main.holder_tag.*
 import kotlinx.coroutines.*
 import org.koin.android.ext.android.inject
 import kotlin.coroutines.CoroutineContext
@@ -122,6 +123,7 @@ class TagFragment : Fragment(), CoroutineScope {
 
                             withContext(Dispatchers.Main) {
                                 Logger.d("in withContext onSpinnerSelected ")
+                                Logger.d("pos : " + holder.adapterPosition)
                                 Logger.d("tagColor =" + tag.color)
                                 Logger.d("tagPattern =" + tag.pattern)
                                 // タグ変更されたので描画やりなおし

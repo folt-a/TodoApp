@@ -25,6 +25,7 @@ import com.folta.todoapp.view.TodoActivity
 import com.folta.todoapp.view.ui.TileDrawable
 import com.folta.todoapp.view.ui.setOnSafeClickListener
 import kotlinx.android.synthetic.main.fragment_todo_list.*
+import kotlinx.android.synthetic.main.holder_todo.*
 import kotlinx.coroutines.*
 import org.koin.android.ext.android.inject
 import org.threeten.bp.LocalDate
@@ -141,7 +142,7 @@ class ToDoListFragment : Fragment(), CoroutineScope {
                 todoAdapter = object : ToDoAdapter(viewToDoList, tagList) {
                     override fun onClick(v: View?, holder: ToDoViewHolder) {
                         if (holder.isShowDetail) {
-                            holder.title.requestFocus()
+                            title.requestFocus()
                         } else {
                             closeKeyboard(v)
                         }
