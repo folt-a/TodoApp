@@ -17,9 +17,19 @@ import kotlinx.android.synthetic.main.holder_tag.view.*
 
 open class TagAdapter(var items: List<Tag>) : RecyclerView.Adapter<TagAdapter.TagViewHolder>() {
 
+    enum class ListShowState {
+        NORMAL,
+        DELETE;
+    }
+
+    var state: ListShowState = ListShowState.NORMAL
+
     override fun onBindViewHolder(holder: TagViewHolder, position: Int) {
         val item = items[position]
-        holder.bind(item)
+        when (state) {
+            ListShowState.DELETE -> holder.bindDelete(item)
+            ListShowState.NORMAL -> holder.bindNormal(item)
+        }
     }
 
     private val tagColorAdapter = TagColorSpinnerAdapter(Const.tagColorIdList)
@@ -45,9 +55,14 @@ open class TagAdapter(var items: List<Tag>) : RecyclerView.Adapter<TagAdapter.Ta
             tagName.setOnFocusChangeListener { v, hasFocus ->
                 if (onTagNameFocusChange(v, hasFocus, holder)) return@setOnFocusChangeListener
             }
+            deleteButton.setOnClickListener { v ->
+                onClickDelete(v, holder)
+            }
         }
         return holder
     }
+
+    open fun onClickDelete(v: View?, holder: TagViewHolder) {}
 
     open fun onTagNameFocusChange(v: View?, hasFocus: Boolean, holder: TagViewHolder): Boolean {
         return true
@@ -87,7 +102,7 @@ open class TagAdapter(var items: List<Tag>) : RecyclerView.Adapter<TagAdapter.Ta
 
     inner class TagViewHolder(override val containerView: View) :
         RecyclerView.ViewHolder(containerView), LayoutContainer {
-        fun bind(tag: Tag) {
+        fun bindNormal(tag: Tag) {
             if (tag.isDeleted) return
             // TODO VectorをRepeat生成する処理キャッシュしたい
             val drawable = TileDrawable.create(
@@ -97,8 +112,12 @@ open class TagAdapter(var items: List<Tag>) : RecyclerView.Adapter<TagAdapter.Ta
                 Shader.TileMode.REPEAT
             )
             todoTag.setImageDrawable(drawable)
+            tagName.isEnabled = true
+            tagName.setText(tag.tagName)
             // Listenerセットの前に値変更 TODO 重いかな？
+            tagColorSpinner.isEnabled = true
             tagColorSpinner.setSelection(Const.tagColorIdList.indexOf(tag.color), false)
+            tagPatternSpinner.isEnabled = true
             tagPatternSpinner.setSelection(Const.tagPatternIdList.indexOf(tag.pattern), false)
             tagPatternSpinner.onItemSelectedListener =
                 object : AdapterView.OnItemSelectedListener {
@@ -131,7 +150,25 @@ open class TagAdapter(var items: List<Tag>) : RecyclerView.Adapter<TagAdapter.Ta
                     //Spinnerのドロップダウンアイテムが選択されなかった時
                     override fun onNothingSelected(parent: AdapterView<*>) {}
                 }
+            deleteButton.visibility = View.GONE
+        }
+
+        fun bindDelete(tag: Tag) {
+            if (tag.isDeleted) return
+            val drawable = TileDrawable.create(
+                todoTag.context,
+                tag.color,
+                tag.pattern,
+                Shader.TileMode.REPEAT
+            )
+            todoTag.setImageDrawable(drawable)
+            tagName.isEnabled = false
             tagName.setText(tag.tagName)
+            tagColorSpinner.isEnabled = false
+            tagPatternSpinner.isEnabled = false
+            deleteButton.visibility = View.VISIBLE
+//            tagColorSpinner.setSelection(Const.tagColorIdList.indexOf(tag.color), false)
+//            tagPatternSpinner.setSelection(Const.tagPatternIdList.indexOf(tag.pattern), false)
         }
     }
 }

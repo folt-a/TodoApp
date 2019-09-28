@@ -155,6 +155,7 @@ open class ToDoAdapter(
         var isShowDetail = false
 
         fun bindNormal(todo: ToDo, tagList: List<Tag>) {
+            isShowDetail = false
             // todoTag
             var tag = tagList.firstOrNull { it.id == todo.tagId }
 //        タグなし、削除済みタグは未設定タグとして描画する
@@ -170,6 +171,8 @@ open class ToDoAdapter(
                 Shader.TileMode.REPEAT
             )
             todoTag.setImageDrawable(drawable)
+            title.isEnabled = true
+            title.setText(todo.title)
             tagSpinner.setSelection(tagList.indexOf(tag), false)
             tagSpinner.onItemSelectedListener =
                 object : AdapterView.OnItemSelectedListener {
@@ -186,11 +189,11 @@ open class ToDoAdapter(
                     //Spinnerのドロップダウンアイテムが選択されなかった時
                     override fun onNothingSelected(parent: AdapterView<*>) {}
                 }
-            title.isEnabled = true
-            title.setText(todo.title)
             content.fullText = todo.content
             content.closeMemo()
+            detail.cornerRadius = itemView.context.resources.getDimensionPixelSize(R.dimen.dp40)
             detail.setIconResource(R.drawable.ic_detail)
+            detail.setIconTintResource(R.color.colorPrimaryDark)
             isDone.isEnabled = true
             isDone.setOnCheckedChangeListener { v, _ ->
                 onDoneCheck(v, this)
@@ -199,6 +202,7 @@ open class ToDoAdapter(
         }
 
         fun bindDelete(todo: ToDo, tagList: List<Tag>) {
+            isShowDetail = false
             // todoTag
             var tag = tagList.firstOrNull { it.id == todo.tagId }
             //  タグなし、削除済みタグは未設定タグとして描画する
@@ -211,8 +215,11 @@ open class ToDoAdapter(
             todoTag.setImageDrawable(drawable)
             title.isEnabled = false
             title.setText(todo.title)
+            tagTextView.visibility = View.GONE
+            tagSpinner.visibility = View.GONE
             content.fullText = todo.content
             content.closeMemo()
+            detail.cornerRadius = itemView.context.resources.getDimensionPixelSize(R.dimen.dp12)
             detail.setIconResource(R.drawable.ic_trash)
             detail.setIconTintResource(R.color.alert)
             isDone.isEnabled = false

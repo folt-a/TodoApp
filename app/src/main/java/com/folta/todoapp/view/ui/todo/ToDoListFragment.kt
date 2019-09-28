@@ -265,7 +265,6 @@ class ToDoListFragment : Fragment(), CoroutineScope {
                         holder.tagSpinner.visibility = View.VISIBLE
                         holder.content.fullText = items[holder.adapterPosition].content
                         holder.content.openMemo()
-                        holder.content.visibility = View.VISIBLE
                         holder.detail.setIconResource(R.drawable.ic_detail_selected)
                         holder.isShowDetail = true
                         closeKeyboard(v)

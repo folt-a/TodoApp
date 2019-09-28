@@ -58,10 +58,24 @@ class TagFragment : Fragment(), CoroutineScope {
                 closeKeyboard(view)
             }
             R.id.deleteButton -> {
-
+                onClickDeleteOptionMenu(item)
             }
         }
         return true
+    }
+
+    private fun onClickDeleteOptionMenu(menuItem: MenuItem) {
+        when (tagAdapter.state) {
+            TagAdapter.ListShowState.NORMAL -> {
+                tagAdapter.state = TagAdapter.ListShowState.DELETE
+                menuItem.setIcon(R.drawable.ic_check)
+            }
+            else -> {
+                tagAdapter.state = TagAdapter.ListShowState.NORMAL
+                menuItem.setIcon(R.drawable.ic_trash)
+            }
+        }
+        tagAdapter.notifyDataSetChanged()
     }
 
     override fun onCreateView(
@@ -178,6 +192,18 @@ class TagFragment : Fragment(), CoroutineScope {
                             }
                             closeKeyboard(v)
                             return true
+                        }
+                    }
+
+                    override fun onClickDelete(v: View?, holder: TagViewHolder) {
+                        launch(job + Dispatchers.IO) {
+                            // 実データセットからアイテムを削除
+                            tagRepository.delete(tagAdapter.items[holder.adapterPosition].id)
+                            Logger.d("delete : ${tagAdapter.items[holder.adapterPosition].id}")
+                            viewTagList.removeAt(holder.adapterPosition)
+                            withContext(Dispatchers.Main) {
+                                tagAdapter.notifyItemRemoved(holder.adapterPosition)
+                            }
                         }
                     }
                 }
