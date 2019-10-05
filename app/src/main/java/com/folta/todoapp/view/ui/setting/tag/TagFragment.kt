@@ -214,15 +214,17 @@ class TagFragment : Fragment(), CoroutineScope {
         }
 
         fab.setOnSafeClickListener {
-            val tag =
-                Tag(
-                    id = 0,
-                    tagName = "タグ${tagAdapter.itemCount + 1}",
-                    pattern = Const.tagPatternIdList[Random.nextInt(Const.tagPatternIdList.size)],
-                    color = Const.tagColorIdList[Random.nextInt(Const.tagColorIdList.size)]
-                )
+
             launch(Dispatchers.IO) {
                 Logger.d("in IO setOnSafeClickListener ")
+                val count = tagRepository.count()
+                val tag =
+                    Tag(
+                        id = 0,
+                        tagName = "タグ${count + 1}",
+                        pattern = Const.tagPatternIdList[Random.nextInt(Const.tagPatternIdList.size)],
+                        color = Const.tagColorIdList[Random.nextInt(Const.tagColorIdList.size)]
+                    )
 
                 val savedId = tagRepository.save(tag)
                 val savedTag = tagRepository.find(savedId)

@@ -1,8 +1,10 @@
 package com.folta.todoapp.view.ui.todo
 
-import android.app.DatePickerDialog
 import android.content.Context
 import android.graphics.Shader
+import android.graphics.drawable.Animatable2
+import android.graphics.drawable.AnimatedVectorDrawable
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.view.*
@@ -265,7 +267,13 @@ class ToDoListFragment : Fragment(), CoroutineScope {
                         holder.tagSpinner.visibility = View.VISIBLE
                         holder.content.fullText = items[holder.adapterPosition].content
                         holder.content.openMemo()
-                        holder.detail.setIconResource(R.drawable.ic_detail_selected)
+                        val icon = holder.detail.icon as AnimatedVectorDrawable
+                        icon.registerAnimationCallback(object : Animatable2.AnimationCallback() {
+                            override fun onAnimationEnd(drawable: Drawable?) {
+                                holder.detail.setIconResource(R.drawable.ic_detail_selected)
+                            }
+                        })
+                        if (!icon.isRunning) icon.start()
                         holder.isShowDetail = true
                         closeKeyboard(v)
                     }
@@ -277,7 +285,13 @@ class ToDoListFragment : Fragment(), CoroutineScope {
                         holder.tagSpinner.visibility = View.GONE
                         holder.content.fullText = items[holder.adapterPosition].content
                         holder.content.closeMemo()
-                        holder.detail.setIconResource(R.drawable.ic_detail)
+                        val icon = holder.detail.icon as AnimatedVectorDrawable
+                        icon.registerAnimationCallback(object : Animatable2.AnimationCallback() {
+                            override fun onAnimationEnd(drawable: Drawable?) {
+                                holder.detail.setIconResource(R.drawable.ic_detail)
+                            }
+                        })
+                        if (!icon.isRunning) icon.start()
                         holder.isShowDetail = false
                         closeKeyboard(v)
                     }
