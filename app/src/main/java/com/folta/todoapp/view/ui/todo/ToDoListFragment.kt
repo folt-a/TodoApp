@@ -26,6 +26,7 @@ import com.folta.todoapp.data.local.ToDoRepository
 import com.folta.todoapp.view.TodoActivity
 import com.folta.todoapp.view.ui.TileDrawable
 import com.folta.todoapp.view.ui.setOnSafeClickListener
+import com.wdullaer.materialdatetimepicker.date.DatePickerDialog
 import kotlinx.android.synthetic.main.fragment_todo_list.*
 import kotlinx.android.synthetic.main.holder_todo.*
 import kotlinx.coroutines.*
@@ -34,7 +35,7 @@ import org.threeten.bp.LocalDate
 import org.threeten.bp.format.DateTimeFormatter
 import kotlin.coroutines.CoroutineContext
 
-class ToDoListFragment : Fragment(), CoroutineScope {
+class ToDoListFragment : Fragment(), CoroutineScope, DatePickerDialog.OnDateSetListener {
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
 
@@ -88,25 +89,31 @@ class ToDoListFragment : Fragment(), CoroutineScope {
     }
 
     private fun onClickCalendarOptionMenu() {
-        val picker = this.context?.let { it -> DatePickerDialog(it) }
-        picker?.setOnDateSetListener { _, year, month, dayOfMonth ->
-            titleDate = LocalDate.of(year, month + 1, dayOfMonth)
-            val formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
-            (activity as TodoActivity).setActionBarTitle(titleDate.format(formatter))
-            launch(Dispatchers.IO) {
-                Logger.d("in IO onClickCalendarOptionMenu")
+        val picker = DatePickerDialog.newInstance(
+            this,
+            titleDate.year,
+            titleDate.monthValue - 1,
+            titleDate.dayOfMonth
+        )
+        activity?.supportFragmentManager?.let { picker.show(it, "Datepickerdialog") }
+    }
 
-                viewToDoList =
-                    todoRepository.findByDate(titleDate.toStringyyyyMMdd()).toMutableList()
-                withContext(Dispatchers.Main) {
-                    Logger.d("in withContext onClickCalendarOptionMenu")
-                    todoAdapter.items = viewToDoList
-                    todoAdapter.notifyDataSetChanged()
-                }
+
+    override fun onDateSet(view: DatePickerDialog?, year: Int, monthOfYear: Int, dayOfMonth: Int) {
+        titleDate = LocalDate.of(year, monthOfYear + 1, dayOfMonth)
+        val formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
+        (activity as TodoActivity).setActionBarTitle(titleDate.format(formatter))
+        launch(Dispatchers.IO) {
+            Logger.d("in IO onClickCalendarOptionMenu")
+
+            viewToDoList =
+                todoRepository.findByDate(titleDate.toStringyyyyMMdd()).toMutableList()
+            withContext(Dispatchers.Main) {
+                Logger.d("in withContext onClickCalendarOptionMenu")
+                todoAdapter.items = viewToDoList
+                todoAdapter.notifyDataSetChanged()
             }
         }
-        picker?.updateDate(titleDate.year, titleDate.monthValue - 1, titleDate.dayOfMonth)
-        picker?.show()
     }
 
     private fun LocalDate.toStringyyyyMMdd(): String =

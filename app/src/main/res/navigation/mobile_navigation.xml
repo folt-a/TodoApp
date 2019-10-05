@@ -8,9 +8,9 @@
 
     <fragment
             android:id="@+id/navigation_home"
-            android:name="com.folta.todoapp.view.ui.home.HomeFragment"
+            android:name="com.folta.todoapp.view.ui.report.ReportFragment"
             android:label="@string/title_home"
-            tools:layout="@layout/fragment_home" />
+            tools:layout="@layout/fragment_report" />
 
     <fragment
             android:id="@+id/navigation_todo"
