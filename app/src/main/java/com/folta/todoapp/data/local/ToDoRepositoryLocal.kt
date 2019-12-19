@@ -16,6 +16,10 @@ class ToDoRepositoryLocal : ToDoRepository {
         dao.delete(id)
     }
 
+    override suspend fun getExistsDate(): List<String> {
+        return dao.getExistsDate()
+    }
+
     override suspend fun find(Id: Int): ToDo? {
         return dao.findById(Id)
     }

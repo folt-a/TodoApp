@@ -23,9 +23,10 @@ import com.folta.todoapp.R
 import com.folta.todoapp.data.local.TagRepository
 import com.folta.todoapp.data.local.ToDo
 import com.folta.todoapp.data.local.ToDoRepository
-import com.folta.todoapp.view.TodoActivity
+import com.folta.todoapp.view.MainActivity
 import com.folta.todoapp.view.ui.TileDrawable
 import com.folta.todoapp.view.ui.setOnSafeClickListener
+import com.wdullaer.materialdatetimepicker.Utils
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog
 import kotlinx.android.synthetic.main.fragment_todo_list.*
 import kotlinx.android.synthetic.main.holder_todo.*
@@ -33,9 +34,14 @@ import kotlinx.coroutines.*
 import org.koin.android.ext.android.inject
 import org.threeten.bp.LocalDate
 import org.threeten.bp.format.DateTimeFormatter
+import java.util.*
 import kotlin.coroutines.CoroutineContext
 
-class ToDoListFragment : Fragment(), CoroutineScope, DatePickerDialog.OnDateSetListener {
+class ToDoListFragment : Fragment(), TodoContract.View, CoroutineScope,
+    DatePickerDialog.OnDateSetListener {
+
+    override var presenter: TodoContract.Presenter = TodoPresenter(this)
+
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
 
@@ -89,20 +95,41 @@ class ToDoListFragment : Fragment(), CoroutineScope, DatePickerDialog.OnDateSetL
     }
 
     private fun onClickCalendarOptionMenu() {
-        val picker = DatePickerDialog.newInstance(
-            this,
-            titleDate.year,
-            titleDate.monthValue - 1,
-            titleDate.dayOfMonth
-        )
-        activity?.supportFragmentManager?.let { picker.show(it, "Datepickerdialog") }
+        launch(Dispatchers.IO) {
+            val picker = DatePickerDialog.newInstance(
+                this@ToDoListFragment,
+                titleDate.year,
+                titleDate.monthValue - 1,
+                titleDate.dayOfMonth
+            )
+            val strDates = todoRepository.getExistsDate()
+            Logger.d("onClickCalendarOptionMenu highlightedDays $strDates")
+            withContext(Dispatchers.Main) {
+                if (strDates.isNotEmpty()) {
+                    val array = arrayOfNulls<Calendar>(strDates.size)
+                    strDates.forEachIndexed { index, s ->
+                        val date = LocalDate.parse(s, formatter)
+                        val calendar = Calendar.getInstance(TimeZone.getDefault())
+                        calendar.set(Calendar.YEAR, date.year)
+                        calendar.set(Calendar.MONTH, date.monthValue - 1)
+                        calendar.set(Calendar.DAY_OF_MONTH, date.dayOfMonth)
+                        Utils.trimToMidnight(calendar)
+                        array[index] = calendar
+                    }
+                    picker.highlightedDays = array
+                }
+                context?.let { picker.setCancelColor(ContextCompat.getColor(it, R.color.darkGray)) }
+                picker.dismissOnPause(true)
+                picker.setTitle("Select Date!!☆彡")
+                activity?.supportFragmentManager?.let { picker.show(it, "Datepickerdialog") }
+            }
+        }
     }
 
 
     override fun onDateSet(view: DatePickerDialog?, year: Int, monthOfYear: Int, dayOfMonth: Int) {
         titleDate = LocalDate.of(year, monthOfYear + 1, dayOfMonth)
-        val formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
-        (activity as TodoActivity).setActionBarTitle(titleDate.format(formatter))
+        (activity as MainActivity).setActionBarTitle(titleDate.format(formatter))
         launch(Dispatchers.IO) {
             Logger.d("in IO onClickCalendarOptionMenu")
 
@@ -116,8 +143,16 @@ class ToDoListFragment : Fragment(), CoroutineScope, DatePickerDialog.OnDateSetL
         }
     }
 
-    private fun LocalDate.toStringyyyyMMdd(): String =
-        "${this.year}${this.monthValue + 1}${this.dayOfMonth}"
+    private val formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
+
+    private fun LocalDate.toStringyyyyMMdd(): String {
+        return formatter.format(this)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        presenter.start()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -131,8 +166,7 @@ class ToDoListFragment : Fragment(), CoroutineScope, DatePickerDialog.OnDateSetL
         setHasOptionsMenu(true)
 
         titleDate = LocalDate.now()
-        val formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
-        (activity as TodoActivity).setActionBarTitle(titleDate.format(formatter))
+        (activity as MainActivity).setActionBarTitle(titleDate.format(formatter))
 
         recycleView.setHasFixedSize(true)
         recycleView.layoutManager = LinearLayoutManager(view.context)
@@ -358,7 +392,7 @@ class ToDoListFragment : Fragment(), CoroutineScope, DatePickerDialog.OnDateSetL
                     content = "",
                     title = "",
                     tagId = 0,
-                    createdAt = "${titleDate.year}${titleDate.monthValue + 1}${titleDate.dayOfMonth}",
+                    createdAt = titleDate.toStringyyyyMMdd(),
                     orderId = orderId
                 )
             launch(Dispatchers.IO) {
@@ -380,7 +414,7 @@ class ToDoListFragment : Fragment(), CoroutineScope, DatePickerDialog.OnDateSetL
         }
 
         val getRecyclerViewSimpleCallBack =
-            // 引数で、上下のドラッグ、および左方向のスワイプを有効にしている。
+            // 引数で、上下のドラッグを有効にしている。
             object : ItemTouchHelper.SimpleCallback(
                 ItemTouchHelper.UP or ItemTouchHelper.DOWN,
                 ItemTouchHelper.ANIMATION_TYPE_SWIPE_CANCEL

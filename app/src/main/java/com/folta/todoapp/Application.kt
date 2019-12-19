@@ -5,6 +5,8 @@ import androidx.room.Room
 import com.folta.todoapp.data.local.*
 import com.folta.todoapp.view.ui.setting.MemoOpen
 import com.folta.todoapp.view.ui.setting.Pref
+import com.folta.todoapp.view.ui.todo.TodoContract
+import com.folta.todoapp.view.ui.todo.TodoPresenter
 import com.jakewharton.threetenabp.AndroidThreeTen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -20,6 +22,9 @@ class Application : android.app.Application() {
     private val module: Module = module {
         single<ToDoRepository> { (ToDoRepositoryLocal()) }
         single<TagRepository> { (TagRepositoryLocal()) }
+        factory<TodoContract.Presenter> { (view: TodoContract.View) ->
+            TodoPresenter(view)
+        }
     }
 
     override fun onCreate() {
@@ -46,7 +51,7 @@ class Application : android.app.Application() {
             Logger.d("初回起動")
 
             CoroutineScope(Dispatchers.Main + job).launch {
-//                Setting
+                //                Setting
                 Pref(applicationContext).memoOpen = MemoOpen.OneLine
 //                デフォルトのタグを追加
                 val tagRepository by inject<TagRepository>()
