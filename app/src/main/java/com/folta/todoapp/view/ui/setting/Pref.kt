@@ -9,6 +9,7 @@ interface Profile {
     var memoOpen: MemoOpen
     val tagColor: TagColor
     val tagPattern: TagPattern
+//    var countDebug:Int
 }
 
 class Pref(context: Context) : Profile {
@@ -32,6 +33,9 @@ class Pref(context: Context) : Profile {
     override val tagPattern: TagPattern
         get() = TagPattern.from(pref.getInt(PREF_KEY_TAG_PATTERN, TagPattern.Pattern1.value))
 
+//    override var countDebug: Int
+//        get() = pref.getInt("countdebug", 0)
+//        set(value) = pref.edit().putInt("countdebug", value).apply()
 }
 
 enum class MemoOpen(val value: String) {

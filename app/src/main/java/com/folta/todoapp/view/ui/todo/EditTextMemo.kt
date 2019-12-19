@@ -71,13 +71,11 @@ class EditTextMemo(context: Context, attrs: AttributeSet) : AppCompatEditText(co
         )
 //        文字の大きさ
         this.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10f)
-
+        setClosedMemoText(this.fullText)
+        showClosedMemo()
         this.isEnabled = false
         this.isFocusable = false
         this.isFocusableInTouchMode = false
-
-        setClosedMemoText(this.fullText)
-        showClosedMemo()
     }
 
     @SuppressLint("SetTextI18n")
@@ -87,7 +85,6 @@ class EditTextMemo(context: Context, attrs: AttributeSet) : AppCompatEditText(co
             textState == MemoOpen.OneLine && text.length > 20 -> {
                 this.setText("${text.replace("\n", " ").substring(0..20)}...")
             }
-
             textState == MemoOpen.OneLine -> {
                 this.setText(text.replace("\n", " "))
             }

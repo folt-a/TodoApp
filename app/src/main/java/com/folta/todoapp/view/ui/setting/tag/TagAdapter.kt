@@ -11,59 +11,25 @@ import com.folta.todoapp.Logger
 import com.folta.todoapp.R
 import com.folta.todoapp.data.local.Tag
 import com.folta.todoapp.view.ui.TileDrawable
+import kotlinx.android.extensions.LayoutContainer
+import kotlinx.android.synthetic.main.holder_tag.*
 import kotlinx.android.synthetic.main.holder_tag.view.*
 
 open class TagAdapter(var items: List<Tag>) : RecyclerView.Adapter<TagAdapter.TagViewHolder>() {
 
+    enum class ListShowState {
+        NORMAL,
+        DELETE;
+    }
+
+    var state: ListShowState = ListShowState.NORMAL
+
     override fun onBindViewHolder(holder: TagViewHolder, position: Int) {
         val item = items[position]
-
-        if (item.isDeleted) return
-        // TODO VectorをRepeat生成する処理キャッシュしたい
-        val drawable = TileDrawable.create(
-            holder.todoTag.context,
-            item.color,
-            item.pattern,
-            Shader.TileMode.REPEAT
-        )
-        holder.todoTag.setImageDrawable(drawable)
-
-        // Listenerセットの前に値変更 TODO 重いかな？
-        holder.tagColorSpinner.setSelection(Const.tagColorIdList.indexOf(item.color), false)
-        holder.tagPatternSpinner.setSelection(Const.tagPatternIdList.indexOf(item.pattern), false)
-        holder.tagPatternSpinner.onItemSelectedListener =
-            object : AdapterView.OnItemSelectedListener {
-                //Spinnerのドロップダウンアイテムが選択された時
-                override fun onItemSelected(
-                    parent: AdapterView<*>?,
-                    view: View?,
-                    position: Int,
-                    id: Long
-                ) {
-                    onPatternSpinnerSelected(view, id.toInt(), position, holder)
-                }
-
-                //Spinnerのドロップダウンアイテムが選択されなかった時
-                override fun onNothingSelected(parent: AdapterView<*>) {}
-            }
-
-        holder.tagColorSpinner.onItemSelectedListener =
-            object : AdapterView.OnItemSelectedListener {
-                //Spinnerのドロップダウンアイテムが選択された時
-                override fun onItemSelected(
-                    parent: AdapterView<*>?,
-                    view: View?,
-                    position: Int,
-                    id: Long
-                ) {
-                    onColorSpinnerSelected(view, id.toInt(), position, holder)
-                }
-
-                //Spinnerのドロップダウンアイテムが選択されなかった時
-                override fun onNothingSelected(parent: AdapterView<*>) {}
-            }
-
-        holder.tagName.setText(item.tagName)
+        when (state) {
+            ListShowState.DELETE -> holder.bindDelete(item)
+            ListShowState.NORMAL -> holder.bindNormal(item)
+        }
     }
 
     private val tagColorAdapter = TagColorSpinnerAdapter(Const.tagColorIdList)
@@ -80,22 +46,23 @@ open class TagAdapter(var items: List<Tag>) : RecyclerView.Adapter<TagAdapter.Ta
 
 //        listenerをセットする
         with(holder.itemView) {
-
             tagName.setOnClickListener { v ->
                 onTagNameClick(v, holder)
             }
-
             tagName.setOnEditorActionListener { v, actionId, _ ->
                 onTagNameEditorAction(v, actionId, holder)
             }
-
             tagName.setOnFocusChangeListener { v, hasFocus ->
                 if (onTagNameFocusChange(v, hasFocus, holder)) return@setOnFocusChangeListener
             }
-
+            deleteButton.setOnClickListener { v ->
+                onClickDelete(v, holder)
+            }
         }
         return holder
     }
+
+    open fun onClickDelete(v: View?, holder: TagViewHolder) {}
 
     open fun onTagNameFocusChange(v: View?, hasFocus: Boolean, holder: TagViewHolder): Boolean {
         return true
@@ -133,11 +100,75 @@ open class TagAdapter(var items: List<Tag>) : RecyclerView.Adapter<TagAdapter.Ta
         return item
     }
 
-    class TagViewHolder(itemView: View) :
-        RecyclerView.ViewHolder(itemView) {
-        val todoTag: ImageView = itemView.todoTag
-        val tagName: EditText = itemView.tagName
-        val tagPatternSpinner: Spinner = itemView.tagPatternSpinner
-        val tagColorSpinner: Spinner = itemView.tagColorSpinner
+    inner class TagViewHolder(override val containerView: View) :
+        RecyclerView.ViewHolder(containerView), LayoutContainer {
+        fun bindNormal(tag: Tag) {
+            if (tag.isDeleted) return
+            // TODO VectorをRepeat生成する処理キャッシュしたい
+            val drawable = TileDrawable.create(
+                todoTag.context,
+                tag.color,
+                tag.pattern,
+                Shader.TileMode.REPEAT
+            )
+            todoTag.setImageDrawable(drawable)
+            tagName.isEnabled = true
+            tagName.setText(tag.tagName)
+            // Listenerセットの前に値変更 TODO 重いかな？
+            tagColorSpinner.isEnabled = true
+            tagColorSpinner.setSelection(Const.tagColorIdList.indexOf(tag.color), false)
+            tagPatternSpinner.isEnabled = true
+            tagPatternSpinner.setSelection(Const.tagPatternIdList.indexOf(tag.pattern), false)
+            tagPatternSpinner.onItemSelectedListener =
+                object : AdapterView.OnItemSelectedListener {
+                    //Spinnerのドロップダウンアイテムが選択された時
+                    override fun onItemSelected(
+                        parent: AdapterView<*>?,
+                        view: View?,
+                        position: Int,
+                        id: Long
+                    ) {
+                        onPatternSpinnerSelected(view, id.toInt(), position, this@TagViewHolder)
+                    }
+
+                    //Spinnerのドロップダウンアイテムが選択されなかった時
+                    override fun onNothingSelected(parent: AdapterView<*>) {}
+                }
+
+            tagColorSpinner.onItemSelectedListener =
+                object : AdapterView.OnItemSelectedListener {
+                    //Spinnerのドロップダウンアイテムが選択された時
+                    override fun onItemSelected(
+                        parent: AdapterView<*>?,
+                        view: View?,
+                        position: Int,
+                        id: Long
+                    ) {
+                        onColorSpinnerSelected(view, id.toInt(), position, this@TagViewHolder)
+                    }
+
+                    //Spinnerのドロップダウンアイテムが選択されなかった時
+                    override fun onNothingSelected(parent: AdapterView<*>) {}
+                }
+            deleteButton.visibility = View.GONE
+        }
+
+        fun bindDelete(tag: Tag) {
+            if (tag.isDeleted) return
+            val drawable = TileDrawable.create(
+                todoTag.context,
+                tag.color,
+                tag.pattern,
+                Shader.TileMode.REPEAT
+            )
+            todoTag.setImageDrawable(drawable)
+            tagName.isEnabled = false
+            tagName.setText(tag.tagName)
+            tagColorSpinner.isEnabled = false
+            tagPatternSpinner.isEnabled = false
+            deleteButton.visibility = View.VISIBLE
+//            tagColorSpinner.setSelection(Const.tagColorIdList.indexOf(tag.color), false)
+//            tagPatternSpinner.setSelection(Const.tagPatternIdList.indexOf(tag.pattern), false)
+        }
     }
 }

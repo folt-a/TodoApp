@@ -7,9 +7,15 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
 apply plugin: 'org.jetbrains.dokka-android'
-
+androidExtensions {
+    experimental = true
+}
 android {
     compileSdkVersion 28
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
     defaultConfig {
         applicationId "com.folta.todoapp"
         minSdkVersion 24
@@ -32,6 +38,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+}
+
+repositories {
+    maven { url 'https://jitpack.io' }
 }
 
 dokka {
@@ -66,7 +76,11 @@ dependencies {
     implementation 'com.jakewharton.timber:timber:4.7.1'
     implementation 'com.jakewharton.threetenabp:threetenabp:1.2.1'
 
+    implementation 'com.wdullaer:materialdatetimepicker:4.2.3'
+
     implementation 'org.koin:koin-android:1.0.2'
+
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'

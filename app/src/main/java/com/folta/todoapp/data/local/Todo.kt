@@ -44,4 +44,8 @@ interface ToDoDAO {
 
     @Query("delete from ToDo where id = :id")
     suspend fun delete(id: Int)
+
+    @Query("select createdAt from ToDo group by createdAt ")
+    suspend fun getExistsDate(): List<String>
+
 }

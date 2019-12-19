@@ -1,60 +1,54 @@
 package com.folta.todoapp.view.ui.todo
 
-import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.core.content.ContextCompat
 import com.folta.todoapp.R
 import com.folta.todoapp.data.local.Tag
-import kotlinx.android.synthetic.main.tag_spinner_item.view.*
-import kotlinx.android.synthetic.main.tag_spinner_selected_item.view.*
+import kotlinx.android.extensions.LayoutContainer
+import kotlinx.android.synthetic.main.tag_spinner_item.*
+import kotlinx.android.synthetic.main.tag_spinner_selected_item.*
 
 class TagSpinnerAdapter(private val items: List<Tag>) : BaseAdapter() {
 
-    @SuppressLint("ViewHolder")
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-        val itemView:View
+        val holder: SelectedTagSpinnerViewHolder
         if (convertView == null) {
             val layoutInflater = LayoutInflater.from(parent?.context)
-            itemView = layoutInflater.inflate(R.layout.tag_spinner_selected_item, parent, false)
+            holder = SelectedTagSpinnerViewHolder(
+                layoutInflater.inflate(
+                    R.layout.tag_spinner_selected_item,
+                    parent,
+                    false
+                )
+            )
         } else {
-            itemView = convertView
+            holder = SelectedTagSpinnerViewHolder(convertView)
         }
-        itemView.tagNameSelected.text = items[position].tagName
-        return itemView
+        val tag: Tag = items[position]
+        holder.bind(tag)
+        return holder.containerView
     }
 
     override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup?): View {
-        val itemView:View
+        val holder: TagSpinnerViewHolder
         if (convertView == null) {
             val layoutInflater = LayoutInflater.from(parent?.context)
-            itemView = layoutInflater.inflate(R.layout.tag_spinner_item, parent, false)
+            holder = TagSpinnerViewHolder(
+                layoutInflater.inflate(
+                    R.layout.tag_spinner_item,
+                    parent,
+                    false
+                )
+            )
         } else {
-            itemView = convertView
+            holder = TagSpinnerViewHolder(convertView)
         }
-        val holder = TagSpinnerViewHolder(itemView)
-
         val tag: Tag = items[position]
-        if (tag.id == 0) {
-            val tagPatternDrawable =
-                ContextCompat.getDrawable(holder.todoTag.context, R.drawable.bg_pattern1)?.mutate()
-            tagPatternDrawable?.let { it ->
-                it.setTint(ContextCompat.getColor(holder.todoTag.context, R.color.white))
-                holder.todoTag.setImageDrawable(it)
-            }
-        } else {
-            val tagPatternDrawable = ContextCompat.getDrawable(holder.todoTag.context, tag.pattern)?.mutate()
-            tagPatternDrawable?.let { it ->
-                it.setTint(ContextCompat.getColor(holder.todoTag.context, tag.color))
-                holder.todoTag.setImageDrawable(it)
-            }
-        }
-        holder.tagName.text = tag.tagName
-        return itemView
+        holder.bind(tag)
+        return holder.containerView
     }
 
     override fun getItemId(position: Int): Long {
@@ -73,8 +67,30 @@ class TagSpinnerAdapter(private val items: List<Tag>) : BaseAdapter() {
         return items[position]
     }
 
-    class TagSpinnerViewHolder(itemView: View) {
-        val todoTag: ImageView = itemView.todoTag
-        val tagName: TextView = itemView.tagName
+    inner class TagSpinnerViewHolder(override val containerView: View) : LayoutContainer {
+        fun bind(tag: Tag) {
+            if (tag.id == 0) {
+                val tagPatternDrawable =
+                    ContextCompat.getDrawable(spinnerTag.context, R.drawable.bg_pattern1)?.mutate()
+                tagPatternDrawable?.let { it ->
+                    it.setTint(ContextCompat.getColor(spinnerTag.context, R.color.white))
+                    spinnerTag.setImageDrawable(it)
+                }
+            } else {
+                val tagPatternDrawable =
+                    ContextCompat.getDrawable(spinnerTag.context, tag.pattern)?.mutate()
+                tagPatternDrawable?.let { it ->
+                    it.setTint(ContextCompat.getColor(spinnerTag.context, tag.color))
+                    spinnerTag.setImageDrawable(it)
+                }
+            }
+            tagName.text = tag.tagName
+        }
+    }
+
+    inner class SelectedTagSpinnerViewHolder(override val containerView: View) : LayoutContainer {
+        fun bind(tag: Tag) {
+            tagNameSelected.text = tag.tagName
+        }
     }
 }

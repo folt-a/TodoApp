@@ -1,8 +1,10 @@
 package com.folta.todoapp.view.ui.todo
 
-import android.app.DatePickerDialog
 import android.content.Context
 import android.graphics.Shader
+import android.graphics.drawable.Animatable2
+import android.graphics.drawable.AnimatedVectorDrawable
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.view.*
@@ -21,17 +23,25 @@ import com.folta.todoapp.R
 import com.folta.todoapp.data.local.TagRepository
 import com.folta.todoapp.data.local.ToDo
 import com.folta.todoapp.data.local.ToDoRepository
-import com.folta.todoapp.view.TodoActivity
+import com.folta.todoapp.view.MainActivity
 import com.folta.todoapp.view.ui.TileDrawable
 import com.folta.todoapp.view.ui.setOnSafeClickListener
+import com.wdullaer.materialdatetimepicker.Utils
+import com.wdullaer.materialdatetimepicker.date.DatePickerDialog
 import kotlinx.android.synthetic.main.fragment_todo_list.*
+import kotlinx.android.synthetic.main.holder_todo.*
 import kotlinx.coroutines.*
 import org.koin.android.ext.android.inject
 import org.threeten.bp.LocalDate
 import org.threeten.bp.format.DateTimeFormatter
+import java.util.*
 import kotlin.coroutines.CoroutineContext
 
-class ToDoListFragment : Fragment(), CoroutineScope {
+class ToDoListFragment : Fragment(), TodoContract.View, CoroutineScope,
+    DatePickerDialog.OnDateSetListener {
+
+    override var presenter: TodoContract.Presenter = TodoPresenter(this)
+
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
 
@@ -46,7 +56,6 @@ class ToDoListFragment : Fragment(), CoroutineScope {
 
     private lateinit var viewToDoList: MutableList<ToDo>
     private lateinit var titleDate: LocalDate
-
     private val job = Job()
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -65,40 +74,85 @@ class ToDoListFragment : Fragment(), CoroutineScope {
                 closeKeyboard(view)
             }
             R.id.deleteButton -> {
-                onClickDeleteOptionMenu()
+                onClickDeleteOptionMenu(item)
             }
         }
         return true
     }
 
-    private fun onClickDeleteOptionMenu() {
-
+    private fun onClickDeleteOptionMenu(menuItem: MenuItem) {
+        when (todoAdapter.state) {
+            ToDoAdapter.ListShowState.NORMAL -> {
+                todoAdapter.state = ToDoAdapter.ListShowState.DELETE
+                menuItem.setIcon(R.drawable.ic_check)
+            }
+            else -> {
+                todoAdapter.state = ToDoAdapter.ListShowState.NORMAL
+                menuItem.setIcon(R.drawable.ic_trash)
+            }
+        }
+        todoAdapter.notifyDataSetChanged()
     }
 
     private fun onClickCalendarOptionMenu() {
-        val picker = this.context?.let { it -> DatePickerDialog(it) }
-        picker?.setOnDateSetListener { _, year, month, dayOfMonth ->
-            titleDate = LocalDate.of(year, month + 1, dayOfMonth)
-            val formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
-            (activity as TodoActivity).setActionBarTitle(titleDate.format(formatter))
-            launch(Dispatchers.IO) {
-                Logger.d("in IO onClickCalendarOptionMenu")
-
-                viewToDoList =
-                    todoRepository.findByDate(titleDate.toStringyyyyMMdd()).toMutableList()
-                withContext(Dispatchers.Main) {
-                    Logger.d("in withContext onClickCalendarOptionMenu")
-                    todoAdapter.items = viewToDoList
-                    todoAdapter.notifyDataSetChanged()
+        launch(Dispatchers.IO) {
+            val picker = DatePickerDialog.newInstance(
+                this@ToDoListFragment,
+                titleDate.year,
+                titleDate.monthValue - 1,
+                titleDate.dayOfMonth
+            )
+            val strDates = todoRepository.getExistsDate()
+            Logger.d("onClickCalendarOptionMenu highlightedDays $strDates")
+            withContext(Dispatchers.Main) {
+                if (strDates.isNotEmpty()) {
+                    val array = arrayOfNulls<Calendar>(strDates.size)
+                    strDates.forEachIndexed { index, s ->
+                        val date = LocalDate.parse(s, formatter)
+                        val calendar = Calendar.getInstance(TimeZone.getDefault())
+                        calendar.set(Calendar.YEAR, date.year)
+                        calendar.set(Calendar.MONTH, date.monthValue - 1)
+                        calendar.set(Calendar.DAY_OF_MONTH, date.dayOfMonth)
+                        Utils.trimToMidnight(calendar)
+                        array[index] = calendar
+                    }
+                    picker.highlightedDays = array
                 }
+                context?.let { picker.setCancelColor(ContextCompat.getColor(it, R.color.darkGray)) }
+                picker.dismissOnPause(true)
+                picker.setTitle("Select Date!!☆彡")
+                activity?.supportFragmentManager?.let { picker.show(it, "Datepickerdialog") }
             }
         }
-        picker?.updateDate(titleDate.year, titleDate.monthValue - 1, titleDate.dayOfMonth)
-        picker?.show()
     }
 
-    private fun LocalDate.toStringyyyyMMdd(): String =
-        "${this.year}${this.monthValue + 1}${this.dayOfMonth}"
+
+    override fun onDateSet(view: DatePickerDialog?, year: Int, monthOfYear: Int, dayOfMonth: Int) {
+        titleDate = LocalDate.of(year, monthOfYear + 1, dayOfMonth)
+        (activity as MainActivity).setActionBarTitle(titleDate.format(formatter))
+        launch(Dispatchers.IO) {
+            Logger.d("in IO onClickCalendarOptionMenu")
+
+            viewToDoList =
+                todoRepository.findByDate(titleDate.toStringyyyyMMdd()).toMutableList()
+            withContext(Dispatchers.Main) {
+                Logger.d("in withContext onClickCalendarOptionMenu")
+                todoAdapter.items = viewToDoList
+                todoAdapter.notifyDataSetChanged()
+            }
+        }
+    }
+
+    private val formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
+
+    private fun LocalDate.toStringyyyyMMdd(): String {
+        return formatter.format(this)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        presenter.start()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -112,11 +166,10 @@ class ToDoListFragment : Fragment(), CoroutineScope {
         setHasOptionsMenu(true)
 
         titleDate = LocalDate.now()
-        val formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
-        (activity as TodoActivity).setActionBarTitle(titleDate.format(formatter))
+        (activity as MainActivity).setActionBarTitle(titleDate.format(formatter))
 
         recycleView.setHasFixedSize(true)
-        recycleView.layoutManager = LinearLayoutManager(this.context)
+        recycleView.layoutManager = LinearLayoutManager(view.context)
 //        recycleView.setOnTouchListener { v, event ->
 //            if (event.action == MotionEvent.ACTION_DOWN) {
 //                closeKeyboard(v)
@@ -141,7 +194,7 @@ class ToDoListFragment : Fragment(), CoroutineScope {
                 todoAdapter = object : ToDoAdapter(viewToDoList, tagList) {
                     override fun onClick(v: View?, holder: ToDoViewHolder) {
                         if (holder.isShowDetail) {
-                            holder.title.requestFocus()
+                            title.requestFocus()
                         } else {
                             closeKeyboard(v)
                         }
@@ -198,7 +251,7 @@ class ToDoListFragment : Fragment(), CoroutineScope {
                         Logger.d("スピナー onItemSelected id = $id")
                         val todo = getEditedToDo(holder)
                         if (todo != null) {
-                            launch(job + Dispatchers.IO)  {
+                            launch(job + Dispatchers.IO) {
                                 Logger.d("in IO onSpinnerSelected")
 
                                 todoRepository.save(todo)
@@ -226,14 +279,43 @@ class ToDoListFragment : Fragment(), CoroutineScope {
                         }
                     }
 
+                    override fun onClickDetail(v: View?, holder: ToDoViewHolder) {
+                        if (todoAdapter.state == ListShowState.DELETE) {
+                            onClickDelete(v, holder)
+                            return
+                        }
+                        if (holder.isShowDetail) {
+                            closeContentDetail(v, holder)
+                        } else {
+                            showContentDetail(v, holder)
+                        }
+                    }
+
+                    override fun onClickDelete(v: View?, holder: ToDoViewHolder) {
+                        launch(job + Dispatchers.IO) {
+                            // 実データセットからアイテムを削除
+                            todoRepository.delete(todoAdapter.items[holder.adapterPosition].id)
+                            Logger.d("delete : ${todoAdapter.items[holder.adapterPosition].id}")
+                            viewToDoList.removeAt(holder.adapterPosition)
+                            withContext(Dispatchers.Main) {
+                                todoAdapter.notifyItemRemoved(holder.adapterPosition)
+                            }
+                        }
+                    }
+
                     override fun showContentDetail(v: View?, holder: ToDoViewHolder) {
                         holder.tagTextView.visibility = View.VISIBLE
                         holder.tagSpinner.visibility = View.VISIBLE
                         holder.content.fullText = items[holder.adapterPosition].content
                         holder.content.openMemo()
-                        holder.content.visibility = View.VISIBLE
-                        holder.detail.setIconResource(R.drawable.ic_detail_selected)
-                        holder.isShowDetail = !holder.isShowDetail
+                        val icon = holder.detail.icon as AnimatedVectorDrawable
+                        icon.registerAnimationCallback(object : Animatable2.AnimationCallback() {
+                            override fun onAnimationEnd(drawable: Drawable?) {
+                                holder.detail.setIconResource(R.drawable.ic_detail_selected)
+                            }
+                        })
+                        if (!icon.isRunning) icon.start()
+                        holder.isShowDetail = true
                         closeKeyboard(v)
                     }
 
@@ -244,9 +326,15 @@ class ToDoListFragment : Fragment(), CoroutineScope {
                         holder.tagSpinner.visibility = View.GONE
                         holder.content.fullText = items[holder.adapterPosition].content
                         holder.content.closeMemo()
-                        holder.detail.setIconResource(R.drawable.ic_detail)
+                        val icon = holder.detail.icon as AnimatedVectorDrawable
+                        icon.registerAnimationCallback(object : Animatable2.AnimationCallback() {
+                            override fun onAnimationEnd(drawable: Drawable?) {
+                                holder.detail.setIconResource(R.drawable.ic_detail)
+                            }
+                        })
+                        if (!icon.isRunning) icon.start()
+                        holder.isShowDetail = false
                         closeKeyboard(v)
-                        holder.isShowDetail = !holder.isShowDetail
                     }
 
                     override fun onContentClick(v: View?, holder: ToDoViewHolder) {
@@ -265,7 +353,7 @@ class ToDoListFragment : Fragment(), CoroutineScope {
                             holder.content.fullText = holder.content.text.toString()
                             Logger.d("onContentFocusChange : $hasFocus")
                             val todo = getEditedToDo(holder)
-                            launch(job + Dispatchers.IO)  {
+                            launch(job + Dispatchers.IO) {
                                 Logger.d("in IO onContentFocusChange ")
 
                                 if (todo != null) todoRepository.save(todo)
@@ -304,7 +392,7 @@ class ToDoListFragment : Fragment(), CoroutineScope {
                     content = "",
                     title = "",
                     tagId = 0,
-                    createdAt = "${titleDate.year}${titleDate.monthValue + 1}${titleDate.dayOfMonth}",
+                    createdAt = titleDate.toStringyyyyMMdd(),
                     orderId = orderId
                 )
             launch(Dispatchers.IO) {
@@ -326,7 +414,7 @@ class ToDoListFragment : Fragment(), CoroutineScope {
         }
 
         val getRecyclerViewSimpleCallBack =
-            // 引数で、上下のドラッグ、および左方向のスワイプを有効にしている。
+            // 引数で、上下のドラッグを有効にしている。
             object : ItemTouchHelper.SimpleCallback(
                 ItemTouchHelper.UP or ItemTouchHelper.DOWN,
                 ItemTouchHelper.ANIMATION_TYPE_SWIPE_CANCEL
@@ -355,17 +443,7 @@ class ToDoListFragment : Fragment(), CoroutineScope {
                 }
 
                 // スワイプしたとき
-                override fun onSwiped(p0: RecyclerView.ViewHolder, p1: Int) {
-//TODO DELETE実装・・・
-//                    p0.let {
-//                        CoroutineScope(Dispatchers.Main + job).launch {
-//                            // 実データセットからアイテムを削除
-//                            todoRepository.delete(todoAdapter.items[p0.adapterPosition].id)
-//                            Logger.d("delete : ${todoAdapter.items[p0.adapterPosition].id}")
-//                            viewToDoList.removeAt(p0.adapterPosition)
-//                        }
-//                    }
-                }
+                override fun onSwiped(p0: RecyclerView.ViewHolder, p1: Int) {}
             }
         val itemTouchHelper = ItemTouchHelper(getRecyclerViewSimpleCallBack)
         itemTouchHelper.attachToRecyclerView(recycleView)

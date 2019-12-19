@@ -12,14 +12,21 @@ import com.folta.todoapp.R
 import com.folta.todoapp.data.local.Tag
 import com.folta.todoapp.data.local.ToDo
 import com.folta.todoapp.view.ui.TileDrawable
+import kotlinx.android.synthetic.main.holder_todo.*
+import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.holder_todo.view.*
-import com.google.android.material.button.MaterialButton
-
 
 open class ToDoAdapter(
     var items: List<ToDo>,
     private val tagList: MutableList<Tag>
 ) : RecyclerView.Adapter<ToDoAdapter.ToDoViewHolder>() {
+
+    enum class ListShowState {
+        NORMAL,
+        DELETE;
+    }
+
+    var state: ListShowState = ListShowState.NORMAL
 
     init {
         tagList.add(
@@ -31,51 +38,14 @@ open class ToDoAdapter(
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: ToDoViewHolder, pos: Int) {
         val item = items[pos]
-
-//        todoTag
-        var tag = tagList.firstOrNull { it.id == item.tagId }
-//        タグなし、削除済みタグは未設定タグとして描画する
-        if (tag == null || tag.isDeleted) {
-            tag = tagList[0]
+        when (state) {
+            ListShowState.DELETE -> holder.bindDelete(item, tagList)
+            ListShowState.NORMAL -> holder.bindNormal(item, tagList)
         }
-        val colorResId = tag.color
-        val patternResId = tag.pattern
-        val drawable = TileDrawable.create(
-            holder.todoTag.context,
-            colorResId,
-            patternResId,
-            Shader.TileMode.REPEAT
-        )
-        holder.todoTag.setImageDrawable(drawable)
-//        val spinnerListener = holder.tagSpinner.onItemSelectedListener
-//        holder.tagSpinner.onItemSelectedListener = null
-        holder.tagSpinner.setSelection(tagList.indexOf(tag), false)
-        holder.tagSpinner.onItemSelectedListener =
-            object : AdapterView.OnItemSelectedListener {
-                //Spinnerのドロップダウンアイテムが選択された時
-                override fun onItemSelected(
-                    parent: AdapterView<*>?,
-                    view: View?,
-                    position: Int,
-                    id: Long
-                ) {
-                    onSpinnerSelected(view, id.toInt(), holder)
-                }
 
-                //Spinnerのドロップダウンアイテムが選択されなかった時
-                override fun onNothingSelected(parent: AdapterView<*>) {}
-            }
-        holder.title.setText(item.title)
-        holder.content.fullText = item.content
-        holder.content.closeMemo()
-        holder.detail.setIconResource(R.drawable.ic_detail)
-        holder.isDone.setOnCheckedChangeListener { v, _ ->
-            onDoneCheck(v, holder)
-        }
-        holder.isDone.isChecked = item.isChecked
-//        Logger.d("FULLTEXT::"+holder.content.fullText)
     }
 
+    //    tagSpinnerAdapterのレイアウトは全てのToDoで共通なのでToDoAdapter生成時に固定
     private val tagSpinnerAdapter: TagSpinnerAdapter = TagSpinnerAdapter(tagList)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ToDoViewHolder {
@@ -84,17 +54,13 @@ open class ToDoAdapter(
         val holder = ToDoViewHolder(view)
 
 //        Spinnerアダプターセット
-//        val spinnerTagAdapter = tagSpinnerAdapter
         holder.tagSpinner.adapter = tagSpinnerAdapter
-//        spinnerTagAdapter.notifyDataSetChanged()
 
 //        listenerをセットする
         with(holder.itemView) {
             setOnClickListener { v ->
                 onClick(v, holder)
             }
-
-
 
             title.setOnClickListener { v ->
                 onTitleClick(v, holder)
@@ -117,11 +83,7 @@ open class ToDoAdapter(
             }
 
             detail.setOnClickListener { v ->
-                if (holder.isShowDetail) {
-                    closeContentDetail(v, holder)
-                } else {
-                    showContentDetail(v, holder)
-                }
+                onClickDetail(v, holder)
             }
         }
 
@@ -176,23 +138,92 @@ open class ToDoAdapter(
     open fun onSpinnerSelected(v: View?, id: Int, holder: ToDoViewHolder) {
     }
 
+    open fun onClickDetail(v: View?, holder: ToDoViewHolder) {
+    }
+
+    open fun onClickDelete(v: View?, holder: ToDoViewHolder) {
+    }
+
     open fun showContentDetail(v: View?, holder: ToDoViewHolder) {
     }
 
     open fun closeContentDetail(v: View?, holder: ToDoViewHolder) {
     }
 
-    class ToDoViewHolder(itemView: View) :
-        RecyclerView.ViewHolder(itemView) {
-        val todoTag: ImageView = itemView.todoTag
-        val title: EditText = itemView.title
-        val content: EditTextMemo = itemView.content
-        val tagTextView: TextView = itemView.tagTextView
-        val tagSpinner: Spinner = itemView.tagSpinner
-        val isDone: CheckBox = itemView.isDone
-        val detail: MaterialButton = itemView.detail
+    inner class ToDoViewHolder(override val containerView: View) :
+        RecyclerView.ViewHolder(containerView), LayoutContainer {
         var isShowDetail = false
 
+        fun bindNormal(todo: ToDo, tagList: List<Tag>) {
+            isShowDetail = false
+            // todoTag
+            var tag = tagList.firstOrNull { it.id == todo.tagId }
+//        タグなし、削除済みタグは未設定タグとして描画する
+            if (tag == null || tag.isDeleted) {
+                tag = tagList[0]
+            }
+            val colorResId = tag.color
+            val patternResId = tag.pattern
+            val drawable = TileDrawable.create(
+                todoTag.context,
+                colorResId,
+                patternResId,
+                Shader.TileMode.REPEAT
+            )
+            todoTag.setImageDrawable(drawable)
+            title.isEnabled = true
+            title.setText(todo.title)
+            tagSpinner.setSelection(tagList.indexOf(tag), false)
+            tagSpinner.onItemSelectedListener =
+                object : AdapterView.OnItemSelectedListener {
+                    //Spinnerのドロップダウンアイテムが選択された時
+                    override fun onItemSelected(
+                        parent: AdapterView<*>?,
+                        view: View?,
+                        position: Int,
+                        id: Long
+                    ) {
+                        onSpinnerSelected(view, id.toInt(), this@ToDoViewHolder)
+                    }
 
+                    //Spinnerのドロップダウンアイテムが選択されなかった時
+                    override fun onNothingSelected(parent: AdapterView<*>) {}
+                }
+            content.fullText = todo.content
+            content.closeMemo()
+            detail.cornerRadius = itemView.context.resources.getDimensionPixelSize(R.dimen.dp40)
+            detail.setIconResource(R.drawable.ic_detail)
+            detail.setIconTintResource(R.color.colorPrimaryDark)
+            isDone.isEnabled = true
+            isDone.setOnCheckedChangeListener { v, _ ->
+                onDoneCheck(v, this)
+            }
+            isDone.isChecked = todo.isChecked
+        }
+
+        fun bindDelete(todo: ToDo, tagList: List<Tag>) {
+            isShowDetail = false
+            // todoTag
+            var tag = tagList.firstOrNull { it.id == todo.tagId }
+            //  タグなし、削除済みタグは未設定タグとして描画する
+            if (tag == null || tag.isDeleted) {
+                tag = tagList[0]
+            }
+            val colorResId = tag.color
+            val patternResId = tag.pattern
+            val drawable = TileDrawable.create(todoTag.context, colorResId, patternResId, Shader.TileMode.REPEAT)
+            todoTag.setImageDrawable(drawable)
+            title.isEnabled = false
+            title.setText(todo.title)
+            tagTextView.visibility = View.GONE
+            tagSpinner.visibility = View.GONE
+            content.fullText = todo.content
+            content.closeMemo()
+            detail.cornerRadius = itemView.context.resources.getDimensionPixelSize(R.dimen.dp12)
+            detail.setIconResource(R.drawable.ic_trash)
+            detail.setIconTintResource(R.color.alert)
+            isDone.isEnabled = false
+            isDone.isChecked = todo.isChecked
+        }
     }
 }

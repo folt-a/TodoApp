@@ -21,6 +21,7 @@ import com.folta.todoapp.data.local.TagRepository
 import com.folta.todoapp.view.ui.TileDrawable
 import com.folta.todoapp.view.ui.setOnSafeClickListener
 import kotlinx.android.synthetic.main.fragment_tag_list.*
+import kotlinx.android.synthetic.main.holder_tag.*
 import kotlinx.coroutines.*
 import org.koin.android.ext.android.inject
 import kotlin.coroutines.CoroutineContext
@@ -57,10 +58,24 @@ class TagFragment : Fragment(), CoroutineScope {
                 closeKeyboard(view)
             }
             R.id.deleteButton -> {
-
+                onClickDeleteOptionMenu(item)
             }
         }
         return true
+    }
+
+    private fun onClickDeleteOptionMenu(menuItem: MenuItem) {
+        when (tagAdapter.state) {
+            TagAdapter.ListShowState.NORMAL -> {
+                tagAdapter.state = TagAdapter.ListShowState.DELETE
+                menuItem.setIcon(R.drawable.ic_check)
+            }
+            else -> {
+                tagAdapter.state = TagAdapter.ListShowState.NORMAL
+                menuItem.setIcon(R.drawable.ic_trash)
+            }
+        }
+        tagAdapter.notifyDataSetChanged()
     }
 
     override fun onCreateView(
@@ -122,6 +137,7 @@ class TagFragment : Fragment(), CoroutineScope {
 
                             withContext(Dispatchers.Main) {
                                 Logger.d("in withContext onSpinnerSelected ")
+                                Logger.d("pos : " + holder.adapterPosition)
                                 Logger.d("tagColor =" + tag.color)
                                 Logger.d("tagPattern =" + tag.pattern)
                                 // タグ変更されたので描画やりなおし
@@ -178,6 +194,18 @@ class TagFragment : Fragment(), CoroutineScope {
                             return true
                         }
                     }
+
+                    override fun onClickDelete(v: View?, holder: TagViewHolder) {
+                        launch(job + Dispatchers.IO) {
+                            // 実データセットからアイテムを削除
+                            tagRepository.delete(tagAdapter.items[holder.adapterPosition].id)
+                            Logger.d("delete : ${tagAdapter.items[holder.adapterPosition].id}")
+                            viewTagList.removeAt(holder.adapterPosition)
+                            withContext(Dispatchers.Main) {
+                                tagAdapter.notifyItemRemoved(holder.adapterPosition)
+                            }
+                        }
+                    }
                 }
                 tagAdapter.setHasStableIds(true)
                 recycleView.adapter = tagAdapter
@@ -186,15 +214,17 @@ class TagFragment : Fragment(), CoroutineScope {
         }
 
         fab.setOnSafeClickListener {
-            val tag =
-                Tag(
-                    id = 0,
-                    tagName = "タグ${tagAdapter.itemCount + 1}",
-                    pattern = Const.tagPatternIdList[Random.nextInt(Const.tagPatternIdList.size)],
-                    color = Const.tagColorIdList[Random.nextInt(Const.tagColorIdList.size)]
-                )
+
             launch(Dispatchers.IO) {
                 Logger.d("in IO setOnSafeClickListener ")
+                val count = tagRepository.count()
+                val tag =
+                    Tag(
+                        id = 0,
+                        tagName = "タグ${count + 1}",
+                        pattern = Const.tagPatternIdList[Random.nextInt(Const.tagPatternIdList.size)],
+                        color = Const.tagColorIdList[Random.nextInt(Const.tagColorIdList.size)]
+                    )
 
                 val savedId = tagRepository.save(tag)
                 val savedTag = tagRepository.find(savedId)
