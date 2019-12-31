@@ -1,4 +1,4 @@
-package com.folta.todoapp.view.ui.setting.tag
+package com.folta.todoapp.view.ui.setting.tag.adapter
 
 import android.graphics.Shader
 import androidx.recyclerview.widget.RecyclerView
@@ -22,7 +22,8 @@ open class TagAdapter(var items: List<Tag>) : RecyclerView.Adapter<TagAdapter.Ta
         DELETE;
     }
 
-    var state: ListShowState = ListShowState.NORMAL
+    var state: ListShowState =
+        ListShowState.NORMAL
 
     override fun onBindViewHolder(holder: TagViewHolder, position: Int) {
         val item = items[position]
@@ -32,8 +33,10 @@ open class TagAdapter(var items: List<Tag>) : RecyclerView.Adapter<TagAdapter.Ta
         }
     }
 
-    private val tagColorAdapter = TagColorSpinnerAdapter(Const.tagColorIdList)
-    private val tagPatternAdapter = TagPatternSpinnerAdapter(Const.tagPatternIdList)
+    private val tagColorAdapter =
+        TagColorSpinnerAdapter(Const.tagColorIdList)
+    private val tagPatternAdapter =
+        TagPatternSpinnerAdapter(Const.tagPatternIdList)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TagViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)

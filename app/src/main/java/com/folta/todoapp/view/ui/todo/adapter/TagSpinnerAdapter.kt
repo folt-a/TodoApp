@@ -1,17 +1,19 @@
-package com.folta.todoapp.view.ui.todo
+package com.folta.todoapp.view.ui.todo.adapter
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import androidx.core.content.ContextCompat
+import com.folta.todoapp.Logger
 import com.folta.todoapp.R
 import com.folta.todoapp.data.local.Tag
+import com.folta.todoapp.view.ui.todo.TodoContract
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.tag_spinner_item.*
 import kotlinx.android.synthetic.main.tag_spinner_selected_item.*
 
-class TagSpinnerAdapter(private val items: List<Tag>) : BaseAdapter() {
+class TagSpinnerAdapter(val presenter: TodoContract.Presenter) : BaseAdapter() {
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
         val holder: SelectedTagSpinnerViewHolder
@@ -27,7 +29,8 @@ class TagSpinnerAdapter(private val items: List<Tag>) : BaseAdapter() {
         } else {
             holder = SelectedTagSpinnerViewHolder(convertView)
         }
-        val tag: Tag = items[position]
+        Logger.i("POSITION:$position")
+        val tag: Tag = presenter.getTagByTagPos(position)
         holder.bind(tag)
         return holder.containerView
     }
@@ -46,17 +49,17 @@ class TagSpinnerAdapter(private val items: List<Tag>) : BaseAdapter() {
         } else {
             holder = TagSpinnerViewHolder(convertView)
         }
-        val tag: Tag = items[position]
+        val tag: Tag = presenter.getTagByTagPos(position)
         holder.bind(tag)
         return holder.containerView
     }
 
     override fun getItemId(position: Int): Long {
-        return items[position].id.toLong()
+        return presenter.getTagId(position)
     }
 
     override fun getCount(): Int {
-        return items.size
+        return presenter.getTagListSize()
     }
 
     override fun hasStableIds(): Boolean {
@@ -64,7 +67,7 @@ class TagSpinnerAdapter(private val items: List<Tag>) : BaseAdapter() {
     }
 
     override fun getItem(position: Int): Any {
-        return items[position]
+        return presenter.getTagByTagPos(position)
     }
 
     inner class TagSpinnerViewHolder(override val containerView: View) : LayoutContainer {

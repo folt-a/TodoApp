@@ -23,7 +23,7 @@ class Application : android.app.Application() {
         single<ToDoRepository> { (ToDoRepositoryLocal()) }
         single<TagRepository> { (TagRepositoryLocal()) }
         factory<TodoContract.Presenter> { (view: TodoContract.View) ->
-            TodoPresenter(view)
+            TodoPresenter(view, inject<ToDoRepository>().value, inject<TagRepository>().value)
         }
     }
 

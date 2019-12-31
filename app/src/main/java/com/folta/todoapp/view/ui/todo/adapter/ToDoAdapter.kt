@@ -1,52 +1,40 @@
-package com.folta.todoapp.view.ui.todo
+package com.folta.todoapp.view.ui.todo.adapter
 
 import android.annotation.SuppressLint
-import android.graphics.Shader
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.recyclerview.widget.RecyclerView
-import com.folta.todoapp.Logger
 import com.folta.todoapp.R
-import com.folta.todoapp.data.local.Tag
-import com.folta.todoapp.data.local.ToDo
-import com.folta.todoapp.view.ui.TileDrawable
+import com.folta.todoapp.view.ui.todo.TodoContract
 import kotlinx.android.synthetic.main.holder_todo.*
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.holder_todo.view.*
 
 open class ToDoAdapter(
-    var items: List<ToDo>,
-    private val tagList: MutableList<Tag>
+    val presenter: TodoContract.Presenter
 ) : RecyclerView.Adapter<ToDoAdapter.ToDoViewHolder>() {
-
+    
     enum class ListShowState {
         NORMAL,
         DELETE;
     }
 
-    var state: ListShowState = ListShowState.NORMAL
-
-    init {
-        tagList.add(
-            0,
-            Tag(id = 0, tagName = "タグなし", pattern = R.drawable.bg_pattern1, color = R.color.white)
-        )
-    }
+    var state: ListShowState =
+        ListShowState.NORMAL
 
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: ToDoViewHolder, pos: Int) {
-        val item = items[pos]
         when (state) {
-            ListShowState.DELETE -> holder.bindDelete(item, tagList)
-            ListShowState.NORMAL -> holder.bindNormal(item, tagList)
+            ListShowState.DELETE -> holder.bindDelete()
+            ListShowState.NORMAL -> holder.bindNormal()
         }
-
     }
 
     //    tagSpinnerAdapterのレイアウトは全てのToDoで共通なのでToDoAdapter生成時に固定
-    private val tagSpinnerAdapter: TagSpinnerAdapter = TagSpinnerAdapter(tagList)
+    private val tagSpinnerAdapter: TagSpinnerAdapter =
+        TagSpinnerAdapter(presenter)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ToDoViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
@@ -94,24 +82,11 @@ open class ToDoAdapter(
     }
 
     override fun getItemCount(): Int {
-        return items.size
+        return presenter.getToDoListSize()
     }
 
     override fun getItemId(position: Int): Long {
-        return items[position].id.toLong()
-    }
-
-
-    internal fun getEditedToDo(holder: ToDoViewHolder): ToDo? {
-        val item = items.getOrNull(holder.adapterPosition)
-        item?.title = holder.title.text.toString()
-        item?.tagId = holder.tagSpinner.selectedItemId.toInt()
-        if (holder.content.isEnabled) {
-            item?.content = holder.content.fullText
-            Logger.d("content change : " + holder.content.fullText)
-        }
-        item?.isChecked = holder.isDone.isChecked
-        return item
+        return presenter.getToDoId(position)
     }
 
     open fun onTitleEditorAction(v: TextView?, actionId: Int, holder: ToDoViewHolder): Boolean {
@@ -154,26 +129,14 @@ open class ToDoAdapter(
         RecyclerView.ViewHolder(containerView), LayoutContainer {
         var isShowDetail = false
 
-        fun bindNormal(todo: ToDo, tagList: List<Tag>) {
+        fun bindNormal() {
             isShowDetail = false
-            // todoTag
-            var tag = tagList.firstOrNull { it.id == todo.tagId }
-//        タグなし、削除済みタグは未設定タグとして描画する
-            if (tag == null || tag.isDeleted) {
-                tag = tagList[0]
-            }
-            val colorResId = tag.color
-            val patternResId = tag.pattern
-            val drawable = TileDrawable.create(
-                todoTag.context,
-                colorResId,
-                patternResId,
-                Shader.TileMode.REPEAT
-            )
-            todoTag.setImageDrawable(drawable)
+
+            presenter.changeTag(containerView,this)
+
             title.isEnabled = true
-            title.setText(todo.title)
-            tagSpinner.setSelection(tagList.indexOf(tag), false)
+            title.setText(presenter.getTitle(this.adapterPosition))
+            tagSpinner.setSelection(presenter.getTagNoByToDoPos(this.adapterPosition), false)
             tagSpinner.onItemSelectedListener =
                 object : AdapterView.OnItemSelectedListener {
                     //Spinnerのドロップダウンアイテムが選択された時
@@ -185,11 +148,10 @@ open class ToDoAdapter(
                     ) {
                         onSpinnerSelected(view, id.toInt(), this@ToDoViewHolder)
                     }
-
                     //Spinnerのドロップダウンアイテムが選択されなかった時
                     override fun onNothingSelected(parent: AdapterView<*>) {}
                 }
-            content.fullText = todo.content
+            content.fullText = presenter.getMemo(this.adapterPosition)
             content.closeMemo()
             detail.cornerRadius = itemView.context.resources.getDimensionPixelSize(R.dimen.dp40)
             detail.setIconResource(R.drawable.ic_detail)
@@ -198,32 +160,23 @@ open class ToDoAdapter(
             isDone.setOnCheckedChangeListener { v, _ ->
                 onDoneCheck(v, this)
             }
-            isDone.isChecked = todo.isChecked
+            isDone.isChecked = presenter.getChecked(this.adapterPosition)
         }
 
-        fun bindDelete(todo: ToDo, tagList: List<Tag>) {
+        fun bindDelete() {
             isShowDetail = false
-            // todoTag
-            var tag = tagList.firstOrNull { it.id == todo.tagId }
-            //  タグなし、削除済みタグは未設定タグとして描画する
-            if (tag == null || tag.isDeleted) {
-                tag = tagList[0]
-            }
-            val colorResId = tag.color
-            val patternResId = tag.pattern
-            val drawable = TileDrawable.create(todoTag.context, colorResId, patternResId, Shader.TileMode.REPEAT)
-            todoTag.setImageDrawable(drawable)
+            presenter.changeTag(containerView,this)
             title.isEnabled = false
-            title.setText(todo.title)
+            title.setText(presenter.getTitle(this.adapterPosition))
             tagTextView.visibility = View.GONE
             tagSpinner.visibility = View.GONE
-            content.fullText = todo.content
+            content.fullText = presenter.getMemo(this.adapterPosition)
             content.closeMemo()
             detail.cornerRadius = itemView.context.resources.getDimensionPixelSize(R.dimen.dp12)
             detail.setIconResource(R.drawable.ic_trash)
             detail.setIconTintResource(R.color.alert)
             isDone.isEnabled = false
-            isDone.isChecked = todo.isChecked
+            isDone.isChecked = presenter.getChecked(this.adapterPosition)
         }
     }
 }

@@ -20,6 +20,7 @@ import com.folta.todoapp.data.local.Tag
 import com.folta.todoapp.data.local.TagRepository
 import com.folta.todoapp.view.ui.TileDrawable
 import com.folta.todoapp.view.ui.setOnSafeClickListener
+import com.folta.todoapp.view.ui.setting.tag.adapter.TagAdapter
 import kotlinx.android.synthetic.main.fragment_tag_list.*
 import kotlinx.android.synthetic.main.holder_tag.*
 import kotlinx.coroutines.*
