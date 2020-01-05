@@ -1,21 +1,24 @@
-package com.folta.todoapp.view.ui.todo.adapter
+package com.folta.todoapp.view.todo.adapter
 
 import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.widget.*
 import androidx.recyclerview.widget.RecyclerView
 import com.folta.todoapp.R
-import com.folta.todoapp.view.ui.todo.TodoContract
+import com.folta.todoapp.view.todo.ToDoListFragment
+import com.folta.todoapp.view.todo.TodoContract
 import kotlinx.android.synthetic.main.holder_todo.*
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.holder_todo.view.*
 
 open class ToDoAdapter(
+    val fragment: ToDoListFragment,
     val presenter: TodoContract.Presenter
 ) : RecyclerView.Adapter<ToDoAdapter.ToDoViewHolder>() {
-    
+
     enum class ListShowState {
         NORMAL,
         DELETE;
@@ -47,38 +50,40 @@ open class ToDoAdapter(
 //        listenerをセットする
         with(holder.itemView) {
             setOnClickListener { v ->
-                onClick(v, holder)
+                fragment.onClickToDo(v, holder)
             }
 
             title.setOnClickListener { v ->
-                onTitleClick(v, holder)
+                fragment.onClickToDoTitle(v, holder)
             }
 
             title.setOnEditorActionListener { v, actionId, _ ->
-                onTitleEditorAction(v, actionId, holder)
+                when (actionId) {
+                    EditorInfo.IME_ACTION_DONE -> {
+                        fragment.onEditorDoneToDoTitle(v, holder)
+                    }
+                    else -> throw RuntimeException()
+                }
             }
 
             title.setOnFocusChangeListener { v, hasFocus ->
-                if (onTitleFocusChange(v, hasFocus, holder)) return@setOnFocusChangeListener
+                fragment.onFocusChangeToDoTitle(v, hasFocus, holder)
             }
 
             content.setOnClickListener { v ->
-                onContentClick(v, holder)
+                fragment.onClickMemo(v, holder)
             }
 
             content.setOnFocusChangeListener { v, hasFocus ->
-                if (onContentFocusChange(v, hasFocus, holder)) return@setOnFocusChangeListener
+                fragment.onFocusChangeToDoMemo(v, hasFocus, holder)
             }
 
             detail.setOnClickListener { v ->
-                onClickDetail(v, holder)
+                fragment.onClickToDoDetailButton(v, holder)
             }
         }
 
         return holder
-    }
-
-    open fun onContentClick(v: View?, holder: ToDoViewHolder) {
     }
 
     override fun getItemCount(): Int {
@@ -89,42 +94,6 @@ open class ToDoAdapter(
         return presenter.getToDoId(position)
     }
 
-    open fun onTitleEditorAction(v: TextView?, actionId: Int, holder: ToDoViewHolder): Boolean {
-        return true
-    }
-
-    open fun onTitleFocusChange(v: View?, hasFocus: Boolean, holder: ToDoViewHolder): Boolean {
-        return true
-    }
-
-    open fun onDoneCheck(v: CompoundButton?, holder: ToDoViewHolder) {
-    }
-
-    open fun onContentFocusChange(v: View?, hasFocus: Boolean, holder: ToDoViewHolder): Boolean {
-        return true
-    }
-
-    open fun onClick(v: View?, holder: ToDoViewHolder) {
-    }
-
-    open fun onTitleClick(v: View?, holder: ToDoViewHolder) {
-    }
-
-    open fun onSpinnerSelected(v: View?, id: Int, holder: ToDoViewHolder) {
-    }
-
-    open fun onClickDetail(v: View?, holder: ToDoViewHolder) {
-    }
-
-    open fun onClickDelete(v: View?, holder: ToDoViewHolder) {
-    }
-
-    open fun showContentDetail(v: View?, holder: ToDoViewHolder) {
-    }
-
-    open fun closeContentDetail(v: View?, holder: ToDoViewHolder) {
-    }
-
     inner class ToDoViewHolder(override val containerView: View) :
         RecyclerView.ViewHolder(containerView), LayoutContainer {
         var isShowDetail = false
@@ -132,7 +101,7 @@ open class ToDoAdapter(
         fun bindNormal() {
             isShowDetail = false
 
-            presenter.changeTag(containerView,this)
+            presenter.changeTag(containerView, this)
 
             title.isEnabled = true
             title.setText(presenter.getTitle(this.adapterPosition))
@@ -146,8 +115,9 @@ open class ToDoAdapter(
                         position: Int,
                         id: Long
                     ) {
-                        onSpinnerSelected(view, id.toInt(), this@ToDoViewHolder)
+                        fragment.onSpinnerSelectedToDoTag(view,this@ToDoViewHolder)
                     }
+
                     //Spinnerのドロップダウンアイテムが選択されなかった時
                     override fun onNothingSelected(parent: AdapterView<*>) {}
                 }
@@ -158,14 +128,14 @@ open class ToDoAdapter(
             detail.setIconTintResource(R.color.colorPrimaryDark)
             isDone.isEnabled = true
             isDone.setOnCheckedChangeListener { v, _ ->
-                onDoneCheck(v, this)
+                fragment.onCheckToDoDone(v,this)
             }
             isDone.isChecked = presenter.getChecked(this.adapterPosition)
         }
 
         fun bindDelete() {
             isShowDetail = false
-            presenter.changeTag(containerView,this)
+            presenter.changeTag(containerView, this)
             title.isEnabled = false
             title.setText(presenter.getTitle(this.adapterPosition))
             tagTextView.visibility = View.GONE

@@ -3,10 +3,10 @@ package com.folta.todoapp
 import androidx.core.app.AppLaunchChecker
 import androidx.room.Room
 import com.folta.todoapp.data.local.*
-import com.folta.todoapp.view.ui.setting.MemoOpen
-import com.folta.todoapp.view.ui.setting.Pref
-import com.folta.todoapp.view.ui.todo.TodoContract
-import com.folta.todoapp.view.ui.todo.TodoPresenter
+import com.folta.todoapp.view.setting.MemoOpen
+import com.folta.todoapp.view.setting.Pref
+import com.folta.todoapp.view.todo.TodoContract
+import com.folta.todoapp.view.todo.TodoPresenter
 import com.jakewharton.threetenabp.AndroidThreeTen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

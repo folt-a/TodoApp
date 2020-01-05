@@ -1,4 +1,4 @@
-package com.folta.todoapp.view.ui.setting.tag.adapter
+package com.folta.todoapp.view.setting.tag.adapter
 
 import android.graphics.Shader
 import androidx.recyclerview.widget.RecyclerView
@@ -10,7 +10,7 @@ import com.folta.todoapp.Const
 import com.folta.todoapp.Logger
 import com.folta.todoapp.R
 import com.folta.todoapp.data.local.Tag
-import com.folta.todoapp.view.ui.TileDrawable
+import com.folta.todoapp.view.TileDrawable
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.holder_tag.*
 import kotlinx.android.synthetic.main.holder_tag.view.*

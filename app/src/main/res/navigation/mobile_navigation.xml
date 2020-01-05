@@ -8,19 +8,19 @@
 
     <fragment
             android:id="@+id/navigation_home"
-            android:name="com.folta.todoapp.view.ui.report.ReportFragment"
+            android:name="com.folta.todoapp.view.report.ReportFragment"
             android:label="@string/title_home"
             tools:layout="@layout/fragment_report" />
 
     <fragment
             android:id="@+id/navigation_todo"
-            android:name="com.folta.todoapp.view.ui.todo.ToDoListFragment"
+            android:name="com.folta.todoapp.view.todo.ToDoListFragment"
             android:label=""
             tools:layout="@layout/fragment_todo_list" />
 
     <fragment
             android:id="@+id/navigation_setting"
-            android:name="com.folta.todoapp.view.ui.setting.SettingsFragment"
+            android:name="com.folta.todoapp.view.setting.SettingsFragment"
             android:label="@string/title_setting"
             tools:layout="@layout/fragment_setting" >
         <action
@@ -35,7 +35,7 @@
 
     <fragment
             android:id="@+id/navigation_tag"
-            android:name="com.folta.todoapp.view.ui.setting.tag.TagFragment"
+            android:name="com.folta.todoapp.view.setting.tag.TagFragment"
             android:label="タグ管理"
             tools:layout="@layout/fragment_tag_list" />
 </navigation>

@@ -1,4 +1,4 @@
-package com.folta.todoapp.view.ui.todo
+package com.folta.todoapp.view.todo
 
 import android.view.View
 import com.folta.todoapp.Logger
@@ -7,8 +7,8 @@ import com.folta.todoapp.data.local.Tag
 import com.folta.todoapp.data.local.TagRepository
 import com.folta.todoapp.data.local.ToDo
 import com.folta.todoapp.data.local.ToDoRepository
-import com.folta.todoapp.Utility.Companion.toStringSlash_yyyyMMdd
-import com.folta.todoapp.view.ui.todo.adapter.ToDoAdapter
+import com.folta.todoapp.toStringSlashyyyyMMdd
+import com.folta.todoapp.view.todo.adapter.ToDoAdapter
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.wdullaer.materialdatetimepicker.Utils
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog
@@ -40,7 +40,7 @@ class TodoPresenter(
         launch(Dispatchers.IO) {
             viewToDoList = withContext(Dispatchers.Default) {
                 Logger.d("in withContext 111 onViewCreated")
-                todoRepos.findByDate(titleDate.toStringSlash_yyyyMMdd()).toMutableList()
+                todoRepos.findByDate(titleDate.toStringSlashyyyyMMdd()).toMutableList()
             }
 
             allTagList = withContext(Dispatchers.Default) {
@@ -74,7 +74,7 @@ class TodoPresenter(
                 content = "",
                 title = "",
                 tagId = 0,
-                createdAt = titleDate.toStringSlash_yyyyMMdd(),
+                createdAt = titleDate.toStringSlashyyyyMMdd(),
                 orderId = orderId
             )
         launch(Dispatchers.IO) {
@@ -120,10 +120,10 @@ class TodoPresenter(
         launch(Dispatchers.IO) {
             Logger.d("in IO onClickCalendarOptionMenu")
             viewToDoList =
-                todoRepos.findByDate(titleDate.toStringSlash_yyyyMMdd()).toMutableList()
+                todoRepos.findByDate(titleDate.toStringSlashyyyyMMdd()).toMutableList()
             withContext(Dispatchers.Main) {
                 Logger.d("in withContext onClickCalendarOptionMenu")
-                viewToDo.SetActionBarTitle(titleDate.toStringSlash_yyyyMMdd())
+                viewToDo.SetActionBarTitle(titleDate.toStringSlashyyyyMMdd())
                 viewToDo.notifyToDoChanged()
             }
         }

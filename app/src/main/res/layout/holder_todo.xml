@@ -82,7 +82,7 @@
                 app:layout_constraintStart_toEndOf="@id/tagTextView"
                 app:layout_constraintTop_toTopOf="@+id/tagTextView" />
 
-        <com.folta.todoapp.view.ui.todo.EditTextMemo
+        <com.folta.todoapp.view.todo.EditTextMemo
                 android:id="@+id/content"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"

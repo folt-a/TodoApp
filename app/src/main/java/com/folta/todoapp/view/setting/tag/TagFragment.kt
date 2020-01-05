@@ -1,4 +1,4 @@
-package com.folta.todoapp.view.ui.setting.tag
+package com.folta.todoapp.view.setting.tag
 
 import android.content.Context
 import android.graphics.Shader
@@ -18,9 +18,9 @@ import com.folta.todoapp.Logger
 import com.folta.todoapp.R
 import com.folta.todoapp.data.local.Tag
 import com.folta.todoapp.data.local.TagRepository
-import com.folta.todoapp.view.ui.TileDrawable
-import com.folta.todoapp.view.ui.setOnSafeClickListener
-import com.folta.todoapp.view.ui.setting.tag.adapter.TagAdapter
+import com.folta.todoapp.view.TileDrawable
+import com.folta.todoapp.view.setOnSafeClickListener
+import com.folta.todoapp.view.setting.tag.adapter.TagAdapter
 import kotlinx.android.synthetic.main.fragment_tag_list.*
 import kotlinx.android.synthetic.main.holder_tag.*
 import kotlinx.coroutines.*

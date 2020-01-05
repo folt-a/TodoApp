@@ -1,4 +1,4 @@
-package com.folta.todoapp.view.ui.todo
+package com.folta.todoapp.view.todo
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -8,9 +8,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.AppCompatEditText
 import com.folta.todoapp.R
-import com.folta.todoapp.view.ui.setting.MemoOpen
-import com.folta.todoapp.view.ui.setting.Pref
-import kotlinx.android.synthetic.main.holder_todo.view.*
+import com.folta.todoapp.view.setting.MemoOpen
+import com.folta.todoapp.view.setting.Pref
 
 class EditTextMemo(context: Context, attrs: AttributeSet) : AppCompatEditText(context, attrs) {
     var isOpen: Boolean = false

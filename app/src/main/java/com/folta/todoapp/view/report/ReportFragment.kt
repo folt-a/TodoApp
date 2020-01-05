@@ -1,4 +1,4 @@
-package com.folta.todoapp.view.ui.report
+package com.folta.todoapp.view.report
 
 import android.graphics.Typeface
 import android.os.Bundle
@@ -22,7 +22,6 @@ import com.wdullaer.materialdatetimepicker.date.DatePickerDialog
 import kotlinx.android.synthetic.main.fragment_report.*
 import org.threeten.bp.LocalDate
 import java.text.DecimalFormat
-import java.util.*
 import kotlin.collections.ArrayList
 
 

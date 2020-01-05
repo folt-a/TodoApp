@@ -1,11 +1,10 @@
-package com.folta.todoapp.view.ui.todo
+package com.folta.todoapp.view.todo
 
-import android.view.View
 import com.folta.todoapp.data.local.Tag
 import com.folta.todoapp.data.local.ToDo
 import com.folta.todoapp.view.BasePresenter
 import com.folta.todoapp.view.BaseView
-import com.folta.todoapp.view.ui.todo.adapter.ToDoAdapter
+import com.folta.todoapp.view.todo.adapter.ToDoAdapter
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog
 import org.threeten.bp.LocalDate

@@ -13,8 +13,8 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.folta.todoapp.Const
 import com.folta.todoapp.R
-import com.folta.todoapp.view.ui.setting.tag.TagFragment
-import com.folta.todoapp.view.ui.todo.ToDoListFragment
+import com.folta.todoapp.view.setting.tag.TagFragment
+import com.folta.todoapp.view.todo.ToDoListFragment
 import kotlinx.android.synthetic.main.activity_todo.*
 
 class MainActivity : AppCompatActivity(), ToDoListFragment.OnFragmentInteractionListener ,TagFragment.OnFragmentInteractionListener{

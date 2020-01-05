@@ -1,4 +1,4 @@
-package com.folta.todoapp.view.ui.todo
+package com.folta.todoapp.view.todo
 
 import android.content.Context
 import android.graphics.Shader
@@ -8,9 +8,7 @@ import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.view.*
-import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
-import android.widget.CompoundButton
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -18,14 +16,15 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.folta.todoapp.Utility.Companion.toStringSlash_yyyyMMdd
 import com.folta.todoapp.Logger
 import com.folta.todoapp.R
 import com.folta.todoapp.data.local.*
+import com.folta.todoapp.toStringSlashyyyyMMdd
 import com.folta.todoapp.view.MainActivity
-import com.folta.todoapp.view.ui.TileDrawable
-import com.folta.todoapp.view.ui.setOnSafeClickListener
-import com.folta.todoapp.view.ui.todo.adapter.ToDoAdapter
+import com.folta.todoapp.view.TileDrawable
+import com.folta.todoapp.view.setOnSafeClickListener
+import com.folta.todoapp.view.todo.adapter.ToDoAdapter
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog
 import kotlinx.android.synthetic.main.fragment_todo_list.*
 import kotlinx.android.synthetic.main.holder_todo.*
@@ -52,12 +51,24 @@ class ToDoListFragment : Fragment(),
 
     private val job = Job()
 
+    /**
+     * Fragmentのoverride 上部オプションメニュー作成
+     *
+     * @param menu
+     * @param inflater
+     */
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         this.menu = menu
         inflater.inflate(R.menu.menu_todo, menu)
     }
 
+    /**
+     * Fragmentのoverride 上部オプションメニュー選択イベント
+     *
+     * @param item
+     * @return
+     */
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         super.onOptionsItemSelected(item)
         when (item.itemId) {
@@ -74,6 +85,11 @@ class ToDoListFragment : Fragment(),
         return true
     }
 
+    /**
+     * オプションメニュー　削除クリック
+     *
+     * @param menuItem
+     */
     private fun onClickDeleteOptionMenu(menuItem: MenuItem) {
         when (todoAdapter.state) {
             ToDoAdapter.ListShowState.NORMAL -> {
@@ -88,6 +104,10 @@ class ToDoListFragment : Fragment(),
         todoAdapter.notifyDataSetChanged()
     }
 
+    /**
+     * オプションメニュー　カレンダークリック
+     *
+     */
     private fun onClickCalendarOptionMenu() {
         launch(Dispatchers.IO) {
             val picker = presenter.createDatePicker()
@@ -98,10 +118,26 @@ class ToDoListFragment : Fragment(),
         }
     }
 
+    /**
+     * DatePickerDialogのoverride 日付選択後イベント
+     *
+     * @param view
+     * @param year
+     * @param monthOfYear
+     * @param dayOfMonth
+     */
     override fun onDateSet(view: DatePickerDialog?, year: Int, monthOfYear: Int, dayOfMonth: Int) {
         presenter.datePickerSet(year, monthOfYear, dayOfMonth)
     }
 
+    /**
+     * Fragmentのoverride
+     *
+     * @param inflater
+     * @param container
+     * @param savedInstanceState
+     * @return
+     */
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -109,6 +145,12 @@ class ToDoListFragment : Fragment(),
         return inflater.inflate(R.layout.fragment_todo_list, container, false)
     }
 
+    /**
+     * Fragmentのoverride
+     *
+     * @param view
+     * @param savedInstanceState
+     */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setHasOptionsMenu(true)
@@ -124,12 +166,12 @@ class ToDoListFragment : Fragment(),
         }.value
         presenter.start()
 
-        (activity as MainActivity).setActionBarTitle(presenter.titleDate.toStringSlash_yyyyMMdd())
+        (activity as MainActivity).setActionBarTitle(presenter.titleDate.toStringSlashyyyyMMdd())
 
         recycleView.setHasFixedSize(true)
         recycleView.layoutManager = LinearLayoutManager(view.context)
 
-        todoAdapter = createToDoAdapter()
+        todoAdapter = ToDoAdapter(this, presenter)
         todoAdapter.setHasStableIds(true)
         recycleView.adapter = todoAdapter
         notifyToDoChanged()
@@ -141,14 +183,14 @@ class ToDoListFragment : Fragment(),
                 DividerItemDecoration.VERTICAL
             )
         )
+
         fab.setOnSafeClickListener {
-            presenter.addNewToDo(it)
+            onClickFab(it)
         }
 
         // 枠をタッチしたときにキーボードを閉じる
         coordinatorLayout.setOnTouchListener { v, _ ->
-            closeKeyboard(v)
-            return@setOnTouchListener true
+            return@setOnTouchListener onClickCoordinatorLayout(v)
         }
 
         val getRecyclerViewSimpleCallBack =
@@ -162,11 +204,7 @@ class ToDoListFragment : Fragment(),
                     viewHolder: RecyclerView.ViewHolder,
                     target: RecyclerView.ViewHolder
                 ): Boolean {
-                    val fromPosition = viewHolder.adapterPosition
-                    val toPosition = target.adapterPosition
-                    presenter.moveToDo(toPosition, fromPosition)
-                    todoAdapter.notifyItemMoved(fromPosition, toPosition)
-                    return true
+                    return onMoveToDo(viewHolder, target)
                 }
 
                 override fun getMovementFlags(
@@ -186,137 +224,171 @@ class ToDoListFragment : Fragment(),
         itemTouchHelper.attachToRecyclerView(recycleView)
     }
 
-    private fun createToDoAdapter(): ToDoAdapter {
-        return object : ToDoAdapter(presenter) {
-            override fun onClick(v: View?, holder: ToDoViewHolder) {
-                if (holder.isShowDetail) {
-                    title.requestFocus()
-                } else {
-                    closeKeyboard(v)
-                }
-            }
+    /**
+     * ToDoをドラッグ移動させた時のイベント
+     *
+     * @param viewHolder
+     * @param target
+     * @return
+     */
+    private fun onMoveToDo(
+        viewHolder: RecyclerView.ViewHolder,
+        target: RecyclerView.ViewHolder
+    ): Boolean {
+        val fromPosition = viewHolder.adapterPosition
+        val toPosition = target.adapterPosition
+        presenter.moveToDo(toPosition, fromPosition)
+        todoAdapter.notifyItemMoved(fromPosition, toPosition)
+        return true
+    }
 
-            override fun onDoneCheck(v: CompoundButton?, holder: ToDoViewHolder) {
-                launch(Dispatchers.IO) {
-                    presenter.fixToDo(holder)
-                }
-            }
+    /**
+     * Fabをクリックしたときのイベント
+     *
+     * @param fab
+     */
+    private fun onClickFab(fab: FloatingActionButton) {
+        presenter.addNewToDo(fab)
+    }
 
-            override fun onTitleClick(v: View?, holder: ToDoViewHolder) {
-                openKeyboard(v)
-            }
+    internal fun onClickMemo(
+        v: View?,
+        holder: ToDoAdapter.ToDoViewHolder
+    ) {
+        Logger.d("onContentClick")
+        openKeyboard(v)
+    }
 
-            override fun onTitleFocusChange(
-                v: View?,
-                hasFocus: Boolean,
-                holder: ToDoViewHolder
-            ): Boolean {
-                if (hasFocus) {
-                    return holder.title.performClick()
-                } else {
-                    launch(Dispatchers.IO) {
-                        presenter.fixToDo(holder)
-                    }
-                    closeKeyboard(v)
-                    return true
-                }
-            }
+    internal fun onClickToDoTitle(v: View?, holder: ToDoAdapter.ToDoViewHolder) {
+        openKeyboard(v)
+    }
 
-            override fun onTitleEditorAction(
-                v: TextView?,
-                actionId: Int,
-                holder: ToDoViewHolder
-            ): Boolean {
-                when (actionId) {
-                    EditorInfo.IME_ACTION_DONE -> {
-                        closeKeyboard(v)
-                        return true
-                    }
-                    else -> {
-                        return false
-                    }
-                }
+    internal fun onFocusChangeToDoMemo(
+        v: View?,
+        hasFocus: Boolean,
+        holder: ToDoAdapter.ToDoViewHolder
+    ): Boolean {
+        if (hasFocus) {
+            return holder.content.performClick()
+        } else {
+            holder.content.fullText = holder.content.text.toString()
+            Logger.d("onContentFocusChange : $hasFocus")
+            launch(job + Dispatchers.IO) {
+                Logger.d("in IO onContentFocusChange ")
+                todoAdapter.presenter.fixToDo(holder)
             }
-
-            override fun onSpinnerSelected(v: View?, id: Int, holder: ToDoViewHolder) {
-                Logger.d("スピナー onItemSelected id = $id")
-                presenter.changeTag(v, holder)
-            }
-
-            override fun onClickDetail(v: View?, holder: ToDoViewHolder) {
-                if (todoAdapter.state == ListShowState.DELETE) {
-                    onClickDelete(v, holder)
-                    return
-                }
-                if (holder.isShowDetail) {
-                    closeContentDetail(v, holder)
-                } else {
-                    showContentDetail(v, holder)
-                }
-            }
-
-            override fun onClickDelete(v: View?, holder: ToDoViewHolder) {
-                presenter.deleteToDo(holder)
-            }
-
-            override fun showContentDetail(v: View?, holder: ToDoViewHolder) {
-                holder.tagTextView.visibility = View.VISIBLE
-                holder.tagSpinner.visibility = View.VISIBLE
-                holder.content.fullText = presenter.getMemo(holder.adapterPosition)
-                holder.content.openMemo()
-                val icon = holder.detail.icon as AnimatedVectorDrawable
-                icon.registerAnimationCallback(object : Animatable2.AnimationCallback() {
-                    override fun onAnimationEnd(drawable: Drawable?) {
-                        holder.detail.setIconResource(R.drawable.ic_detail_selected)
-                    }
-                })
-                if (!icon.isRunning) icon.start()
-                holder.isShowDetail = true
-                closeKeyboard(v)
-            }
-
-            override fun closeContentDetail(v: View?, holder: ToDoViewHolder) {
-                onContentFocusChange(v, false, holder)
-
-                holder.tagTextView.visibility = View.GONE
-                holder.tagSpinner.visibility = View.GONE
-                holder.content.fullText = presenter.getMemo(holder.adapterPosition)
-                holder.content.closeMemo()
-                val icon = holder.detail.icon as AnimatedVectorDrawable
-                icon.registerAnimationCallback(object : Animatable2.AnimationCallback() {
-                    override fun onAnimationEnd(drawable: Drawable?) {
-                        holder.detail.setIconResource(R.drawable.ic_detail)
-                    }
-                })
-                if (!icon.isRunning) icon.start()
-                holder.isShowDetail = false
-                closeKeyboard(v)
-            }
-
-            override fun onContentClick(v: View?, holder: ToDoViewHolder) {
-                Logger.d("onContentClick")
-                openKeyboard(v)
-            }
-
-            override fun onContentFocusChange(
-                v: View?,
-                hasFocus: Boolean,
-                holder: ToDoViewHolder
-            ): Boolean {
-                if (hasFocus) {
-                    return holder.content.performClick()
-                } else {
-                    holder.content.fullText = holder.content.text.toString()
-                    Logger.d("onContentFocusChange : $hasFocus")
-                    launch(job + Dispatchers.IO) {
-                        Logger.d("in IO onContentFocusChange ")
-                        presenter.fixToDo(holder)
-                    }
-                    closeKeyboard(v)
-                    return true
-                }
-            }
+            closeKeyboard(v)
+            return true
         }
+    }
+
+    internal fun onClickToDoDeleteButton(v: View?, holder: ToDoAdapter.ToDoViewHolder) {
+        presenter.deleteToDo(holder)
+    }
+
+    internal fun onClickToDoDetailButton(
+        v: View?,
+        holder: ToDoAdapter.ToDoViewHolder
+    ) {
+        if (todoAdapter.state == ToDoAdapter.ListShowState.DELETE) {
+            onClickToDoDeleteButton(v, holder)
+            return
+        }
+        if (holder.isShowDetail) {
+            closeContentDetail(v, holder)
+        } else {
+            showContentDetail(v, holder)
+        }
+    }
+
+    internal fun onSpinnerSelectedToDoTag(
+        v: View?,
+        holder: ToDoAdapter.ToDoViewHolder
+    ) {
+        presenter.changeTag(v, holder)
+    }
+
+    internal fun onEditorDoneToDoTitle(
+        v: TextView?,
+        holder: ToDoAdapter.ToDoViewHolder
+    ): Boolean {
+        closeKeyboard(v)
+        return true
+    }
+
+    internal fun onFocusChangeToDoTitle(
+        v: View?,
+        hasFocus: Boolean,
+        holder: ToDoAdapter.ToDoViewHolder
+    ): Boolean {
+        if (hasFocus) {
+            return holder.title.performClick()
+        } else {
+            launch(Dispatchers.IO) {
+                presenter.fixToDo(holder)
+            }
+            closeKeyboard(v)
+            return true
+        }
+    }
+
+    internal fun onCheckToDoDone(
+        v: View?,
+        holder: ToDoAdapter.ToDoViewHolder
+    ) {
+        launch(Dispatchers.IO) {
+            presenter.fixToDo(holder)
+        }
+    }
+
+    private fun showContentDetail(v: View?, holder: ToDoAdapter.ToDoViewHolder) {
+        holder.tagTextView.visibility = View.VISIBLE
+        holder.tagSpinner.visibility = View.VISIBLE
+        holder.content.fullText = presenter.getMemo(holder.adapterPosition)
+        holder.content.openMemo()
+        val icon = holder.detail.icon as AnimatedVectorDrawable
+        icon.registerAnimationCallback(object : Animatable2.AnimationCallback() {
+            override fun onAnimationEnd(drawable: Drawable?) {
+                holder.detail.setIconResource(R.drawable.ic_detail_selected)
+            }
+        })
+        if (!icon.isRunning) icon.start()
+        holder.isShowDetail = true
+        closeKeyboard(v)
+    }
+
+    private fun closeContentDetail(v: View?, holder: ToDoAdapter.ToDoViewHolder) {
+        onFocusChangeToDoMemo(v, false, holder)
+
+        holder.tagTextView.visibility = View.GONE
+        holder.tagSpinner.visibility = View.GONE
+        holder.content.fullText = presenter.getMemo(holder.adapterPosition)
+        holder.content.closeMemo()
+        val icon = holder.detail.icon as AnimatedVectorDrawable
+        icon.registerAnimationCallback(object : Animatable2.AnimationCallback() {
+            override fun onAnimationEnd(drawable: Drawable?) {
+                holder.detail.setIconResource(R.drawable.ic_detail)
+            }
+        })
+        if (!icon.isRunning) icon.start()
+        holder.isShowDetail = false
+        closeKeyboard(v)
+    }
+
+    internal fun onClickToDo(
+        v: View?,
+        holder: ToDoAdapter.ToDoViewHolder
+    ) {
+        if (holder.isShowDetail) {
+            title.requestFocus()
+        } else {
+            closeKeyboard(v)
+        }
+    }
+
+    private fun onClickCoordinatorLayout(v: View?): Boolean {
+        closeKeyboard(v)
+        return true
     }
 
     private fun openKeyboard(view: View?) {
@@ -386,12 +458,11 @@ class ToDoListFragment : Fragment(),
         fun onFragmentInteraction(uri: Uri)
     }
 
-
     override fun SetActionBarTitle(title: String) {
         (activity as MainActivity).setActionBarTitle(title)
     }
 
-    override  fun notifyToDoChanged() {
+    override fun notifyToDoChanged() {
         todoAdapter.notifyDataSetChanged()
     }
 
@@ -399,7 +470,7 @@ class ToDoListFragment : Fragment(),
         todoAdapter.notifyItemRemoved(pos)
     }
 
-    override fun notifyToDoAdd(){
+    override fun notifyToDoAdd() {
         todoAdapter.notifyItemInserted(todoAdapter.itemCount - 1)
     }
 }
