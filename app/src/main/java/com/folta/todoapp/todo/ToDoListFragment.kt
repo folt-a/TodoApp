@@ -1,4 +1,4 @@
-package com.folta.todoapp.view.todo
+package com.folta.todoapp.todo
 
 import android.content.Context
 import android.graphics.Shader
@@ -16,14 +16,14 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.folta.todoapp.Logger
+import com.folta.todoapp.utility.Logger
 import com.folta.todoapp.R
 import com.folta.todoapp.data.local.*
-import com.folta.todoapp.toStringSlashyyyyMMdd
-import com.folta.todoapp.view.MainActivity
-import com.folta.todoapp.view.TileDrawable
-import com.folta.todoapp.view.setOnSafeClickListener
-import com.folta.todoapp.view.todo.adapter.ToDoAdapter
+import com.folta.todoapp.utility.toStringSlashyyyyMMdd
+import com.folta.todoapp.MainActivity
+import com.folta.todoapp.utility.TileDrawable
+import com.folta.todoapp.utility.setOnSafeClickListener
+import com.folta.todoapp.todo.adapter.ToDoAdapter
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog
 import kotlinx.android.synthetic.main.fragment_todo_list.*

@@ -1,4 +1,4 @@
-package com.folta.todoapp.view.setting.tag
+package com.folta.todoapp.setting.tag
 
 import android.content.Context
 import android.graphics.Shader
@@ -13,14 +13,14 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.folta.todoapp.Const
-import com.folta.todoapp.Logger
+import com.folta.todoapp.utility.Const
+import com.folta.todoapp.utility.Logger
 import com.folta.todoapp.R
 import com.folta.todoapp.data.local.Tag
 import com.folta.todoapp.data.local.TagRepository
-import com.folta.todoapp.view.TileDrawable
-import com.folta.todoapp.view.setOnSafeClickListener
-import com.folta.todoapp.view.setting.tag.adapter.TagAdapter
+import com.folta.todoapp.utility.TileDrawable
+import com.folta.todoapp.utility.setOnSafeClickListener
+import com.folta.todoapp.setting.tag.adapter.TagAdapter
 import kotlinx.android.synthetic.main.fragment_tag_list.*
 import kotlinx.android.synthetic.main.holder_tag.*
 import kotlinx.coroutines.*
@@ -223,8 +223,10 @@ class TagFragment : Fragment(), CoroutineScope {
                     Tag(
                         id = 0,
                         tagName = "タグ${count + 1}",
-                        pattern = Const.tagPatternIdList[Random.nextInt(Const.tagPatternIdList.size)],
-                        color = Const.tagColorIdList[Random.nextInt(Const.tagColorIdList.size)]
+                        pattern = Const.tagPatternIdList[Random.nextInt(
+                            Const.tagPatternIdList.size)],
+                        color = Const.tagColorIdList[Random.nextInt(
+                            Const.tagColorIdList.size)]
                     )
 
                 val savedId = tagRepository.save(tag)

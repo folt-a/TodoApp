@@ -3,10 +3,11 @@ package com.folta.todoapp
 import androidx.core.app.AppLaunchChecker
 import androidx.room.Room
 import com.folta.todoapp.data.local.*
-import com.folta.todoapp.view.setting.MemoOpen
-import com.folta.todoapp.view.setting.Pref
-import com.folta.todoapp.view.todo.TodoContract
-import com.folta.todoapp.view.todo.TodoPresenter
+import com.folta.todoapp.setting.MemoOpen
+import com.folta.todoapp.setting.Pref
+import com.folta.todoapp.todo.TodoContract
+import com.folta.todoapp.todo.TodoPresenter
+import com.folta.todoapp.utility.Logger
 import com.jakewharton.threetenabp.AndroidThreeTen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -23,7 +24,11 @@ class Application : android.app.Application() {
         single<ToDoRepository> { (ToDoRepositoryLocal()) }
         single<TagRepository> { (TagRepositoryLocal()) }
         factory<TodoContract.Presenter> { (view: TodoContract.View) ->
-            TodoPresenter(view, inject<ToDoRepository>().value, inject<TagRepository>().value)
+            TodoPresenter(
+                view,
+                inject<ToDoRepository>().value,
+                inject<TagRepository>().value
+            )
         }
     }
 

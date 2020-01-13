@@ -1,4 +1,4 @@
-package com.folta.todoapp
+package com.folta.todoapp.utility
 
 import android.util.Log
 import timber.log.Timber

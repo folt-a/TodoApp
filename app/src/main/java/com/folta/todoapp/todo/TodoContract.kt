@@ -1,10 +1,10 @@
-package com.folta.todoapp.view.todo
+package com.folta.todoapp.todo
 
 import com.folta.todoapp.data.local.Tag
 import com.folta.todoapp.data.local.ToDo
-import com.folta.todoapp.view.BasePresenter
-import com.folta.todoapp.view.BaseView
-import com.folta.todoapp.view.todo.adapter.ToDoAdapter
+import com.folta.todoapp.utility.BasePresenter
+import com.folta.todoapp.utility.BaseView
+import com.folta.todoapp.todo.adapter.ToDoAdapter
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog
 import org.threeten.bp.LocalDate
@@ -20,7 +20,7 @@ interface TodoContract {
         fun notifyToDoDelete(pos: Int)
         fun notifyToDoAdd()
     }
-    interface Presenter :BasePresenter{
+    interface Presenter : BasePresenter {
         var titleDate: LocalDate
         suspend fun createDatePicker(): DatePickerDialog
         fun datePickerSet(year: Int, monthOfYear: Int, dayOfMonth: Int)

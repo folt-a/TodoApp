@@ -1,4 +1,4 @@
-package com.folta.todoapp.view
+package com.folta.todoapp.utility
 
 import android.content.Context
 import android.graphics.Bitmap

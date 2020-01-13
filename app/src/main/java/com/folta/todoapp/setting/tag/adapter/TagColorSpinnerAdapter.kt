@@ -1,4 +1,4 @@
-package com.folta.todoapp.view.setting.tag.adapter
+package com.folta.todoapp.setting.tag.adapter
 
 import android.view.LayoutInflater
 import android.view.View

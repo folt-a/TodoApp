@@ -1,14 +1,14 @@
-package com.folta.todoapp.view.todo.adapter
+package com.folta.todoapp.todo.adapter
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import androidx.core.content.ContextCompat
-import com.folta.todoapp.Logger
+import com.folta.todoapp.utility.Logger
 import com.folta.todoapp.R
 import com.folta.todoapp.data.local.Tag
-import com.folta.todoapp.view.todo.TodoContract
+import com.folta.todoapp.todo.TodoContract
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.tag_spinner_item.*
 import kotlinx.android.synthetic.main.tag_spinner_selected_item.*

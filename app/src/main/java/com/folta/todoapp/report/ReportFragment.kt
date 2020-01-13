@@ -1,4 +1,4 @@
-package com.folta.todoapp.view.report
+package com.folta.todoapp.report
 
 import android.graphics.Typeface
 import android.os.Bundle

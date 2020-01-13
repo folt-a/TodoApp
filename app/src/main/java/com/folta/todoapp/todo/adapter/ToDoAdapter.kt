@@ -1,4 +1,4 @@
-package com.folta.todoapp.view.todo.adapter
+package com.folta.todoapp.todo.adapter
 
 import android.annotation.SuppressLint
 import android.view.LayoutInflater
@@ -8,8 +8,8 @@ import android.view.inputmethod.EditorInfo
 import android.widget.*
 import androidx.recyclerview.widget.RecyclerView
 import com.folta.todoapp.R
-import com.folta.todoapp.view.todo.ToDoListFragment
-import com.folta.todoapp.view.todo.TodoContract
+import com.folta.todoapp.todo.ToDoListFragment
+import com.folta.todoapp.todo.TodoContract
 import kotlinx.android.synthetic.main.holder_todo.*
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.holder_todo.view.*

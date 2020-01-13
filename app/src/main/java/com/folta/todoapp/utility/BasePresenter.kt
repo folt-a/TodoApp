@@ -1,4 +1,4 @@
-package com.folta.todoapp.view
+package com.folta.todoapp.utility
 
 interface BasePresenter{
     fun start()

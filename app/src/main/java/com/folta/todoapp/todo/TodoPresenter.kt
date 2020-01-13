@@ -1,14 +1,14 @@
-package com.folta.todoapp.view.todo
+package com.folta.todoapp.todo
 
 import android.view.View
-import com.folta.todoapp.Logger
+import com.folta.todoapp.utility.Logger
 import com.folta.todoapp.R
 import com.folta.todoapp.data.local.Tag
 import com.folta.todoapp.data.local.TagRepository
 import com.folta.todoapp.data.local.ToDo
 import com.folta.todoapp.data.local.ToDoRepository
-import com.folta.todoapp.toStringSlashyyyyMMdd
-import com.folta.todoapp.view.todo.adapter.ToDoAdapter
+import com.folta.todoapp.utility.toStringSlashyyyyMMdd
+import com.folta.todoapp.todo.adapter.ToDoAdapter
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.wdullaer.materialdatetimepicker.Utils
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog
