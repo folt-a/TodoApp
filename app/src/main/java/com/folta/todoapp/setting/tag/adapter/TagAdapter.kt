@@ -10,12 +10,16 @@ import com.folta.todoapp.utility.Const
 import com.folta.todoapp.utility.Logger
 import com.folta.todoapp.R
 import com.folta.todoapp.data.local.Tag
+import com.folta.todoapp.setting.tag.TagContract
+import com.folta.todoapp.setting.tag.TagFragment
+import com.folta.todoapp.setting.tag.TagPresenter
 import com.folta.todoapp.utility.TileDrawable
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.holder_tag.*
 import kotlinx.android.synthetic.main.holder_tag.view.*
 
-open class TagAdapter(var items: List<Tag>) : RecyclerView.Adapter<TagAdapter.TagViewHolder>() {
+open class TagAdapter(val fragment: TagFragment, val presenter: TagContract.Presenter) :
+    RecyclerView.Adapter<TagAdapter.TagViewHolder>() {
 
     enum class ListShowState {
         NORMAL,
@@ -26,10 +30,9 @@ open class TagAdapter(var items: List<Tag>) : RecyclerView.Adapter<TagAdapter.Ta
         ListShowState.NORMAL
 
     override fun onBindViewHolder(holder: TagViewHolder, position: Int) {
-        val item = items[position]
         when (state) {
-            ListShowState.DELETE -> holder.bindDelete(item)
-            ListShowState.NORMAL -> holder.bindNormal(item)
+            ListShowState.DELETE -> holder.bindDelete(position)
+            ListShowState.NORMAL -> holder.bindNormal(position)
         }
     }
 
@@ -50,74 +53,38 @@ open class TagAdapter(var items: List<Tag>) : RecyclerView.Adapter<TagAdapter.Ta
 //        listenerをセットする
         with(holder.itemView) {
             tagName.setOnClickListener { v ->
-                onTagNameClick(v, holder)
+                fragment.onTagNameClick(v, holder)
             }
             tagName.setOnEditorActionListener { v, actionId, _ ->
-                onTagNameEditorAction(v, actionId, holder)
+                fragment.onTagNameEditorAction(v, actionId, holder)
             }
             tagName.setOnFocusChangeListener { v, hasFocus ->
-                if (onTagNameFocusChange(v, hasFocus, holder)) return@setOnFocusChangeListener
+                if (fragment.onTagNameFocusChange(v, hasFocus, holder)) {
+                    return@setOnFocusChangeListener
+                }
             }
             deleteButton.setOnClickListener { v ->
-                onClickDelete(v, holder)
+                fragment.onClickDelete(v, holder)
             }
         }
         return holder
     }
 
-    open fun onClickDelete(v: View?, holder: TagViewHolder) {}
+    override fun getItemCount(): Int = presenter.getTagListSize()
 
-    open fun onTagNameFocusChange(v: View?, hasFocus: Boolean, holder: TagViewHolder): Boolean {
-        return true
-    }
-
-    open fun onTagNameEditorAction(v: TextView?, actionId: Int, holder: TagViewHolder): Boolean {
-        return true
-    }
-
-    open fun onTagNameClick(v: View?, holder: TagViewHolder) {
-    }
-
-    open fun onColorSpinnerSelected(view: View?, id: Int, position: Int, holder: TagViewHolder) {
-    }
-
-    open fun onPatternSpinnerSelected(view: View?, id: Int, position: Int, holder: TagViewHolder) {
-    }
-
-    open fun onSpinnerSelected(v: View?, id: Int, position: Int, holder: TagViewHolder) {}
-
-    override fun getItemCount(): Int = items.size
-
-    override fun getItemId(position: Int): Long {
-        return items[position].id.toLong()
-    }
-
-    internal fun getEditedTag(holder: TagViewHolder): Tag {
-        val item = items[holder.adapterPosition]
-        Logger.d("holder.adapterPosition = " + holder.adapterPosition.toString())
-        Logger.d("color = " + holder.tagColorSpinner.selectedItem.toString())
-        Logger.d("pattern = " + holder.tagPatternSpinner.selectedItem.toString())
-        item.tagName = holder.tagName.text.toString()
-        item.color = holder.tagColorSpinner.selectedItem as Int
-        item.pattern = holder.tagPatternSpinner.selectedItem as Int
-        return item
-    }
+    override fun getItemId(position: Int): Long = presenter.getTagId(position)
 
     inner class TagViewHolder(override val containerView: View) :
         RecyclerView.ViewHolder(containerView), LayoutContainer {
-        fun bindNormal(tag: Tag) {
+        fun bindNormal(pos: Int) {
+            val tag = presenter.getTagByPos(pos)
             if (tag.isDeleted) return
-            // TODO VectorをRepeat生成する処理キャッシュしたい
-            val drawable = TileDrawable.create(
-                todoTag.context,
-                tag.color,
-                tag.pattern,
-                Shader.TileMode.REPEAT
-            )
-            todoTag.setImageDrawable(drawable)
+
+            fragment.tagDraw(todoTag, tag, this)
+
             tagName.isEnabled = true
             tagName.setText(tag.tagName)
-            // Listenerセットの前に値変更 TODO 重いかな？
+            // イベントを発火させないためにListenerセットの前に値変更する。
             tagColorSpinner.isEnabled = true
             tagColorSpinner.setSelection(Const.tagColorIdList.indexOf(tag.color), false)
             tagPatternSpinner.isEnabled = true
@@ -131,10 +98,15 @@ open class TagAdapter(var items: List<Tag>) : RecyclerView.Adapter<TagAdapter.Ta
                         position: Int,
                         id: Long
                     ) {
-                        onPatternSpinnerSelected(view, id.toInt(), position, this@TagViewHolder)
+                        fragment.onPatternSpinnerSelected(
+                            view,
+                            id.toInt(),
+                            position,
+                            this@TagViewHolder
+                        )
                     }
 
-                    //Spinnerのドロップダウンアイテムが選択されなかった時
+                    //Spinnerのドロップダウンアイテムが選択されなかった時はなにもなし
                     override fun onNothingSelected(parent: AdapterView<*>) {}
                 }
 
@@ -147,31 +119,31 @@ open class TagAdapter(var items: List<Tag>) : RecyclerView.Adapter<TagAdapter.Ta
                         position: Int,
                         id: Long
                     ) {
-                        onColorSpinnerSelected(view, id.toInt(), position, this@TagViewHolder)
+                        fragment.onColorSpinnerSelected(
+                            view,
+                            id.toInt(),
+                            position,
+                            this@TagViewHolder
+                        )
                     }
 
-                    //Spinnerのドロップダウンアイテムが選択されなかった時
+                    //Spinnerのドロップダウンアイテムが選択されなかった時はなにもなし
                     override fun onNothingSelected(parent: AdapterView<*>) {}
                 }
             deleteButton.visibility = View.GONE
         }
 
-        fun bindDelete(tag: Tag) {
+        fun bindDelete(pos: Int) {
+            val tag = presenter.getTagByPos(pos)
             if (tag.isDeleted) return
-            val drawable = TileDrawable.create(
-                todoTag.context,
-                tag.color,
-                tag.pattern,
-                Shader.TileMode.REPEAT
-            )
-            todoTag.setImageDrawable(drawable)
+
+            fragment.tagDraw(todoTag,tag,this)
+
             tagName.isEnabled = false
             tagName.setText(tag.tagName)
             tagColorSpinner.isEnabled = false
             tagPatternSpinner.isEnabled = false
             deleteButton.visibility = View.VISIBLE
-//            tagColorSpinner.setSelection(Const.tagColorIdList.indexOf(tag.color), false)
-//            tagPatternSpinner.setSelection(Const.tagPatternIdList.indexOf(tag.pattern), false)
         }
     }
 }

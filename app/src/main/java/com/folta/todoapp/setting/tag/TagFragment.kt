@@ -21,14 +21,19 @@ import com.folta.todoapp.data.local.TagRepository
 import com.folta.todoapp.utility.TileDrawable
 import com.folta.todoapp.utility.setOnSafeClickListener
 import com.folta.todoapp.setting.tag.adapter.TagAdapter
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.android.synthetic.main.fragment_tag_list.*
 import kotlinx.android.synthetic.main.holder_tag.*
 import kotlinx.coroutines.*
 import org.koin.android.ext.android.inject
+import org.koin.core.parameter.parametersOf
 import kotlin.coroutines.CoroutineContext
 import kotlin.random.Random
 
-class TagFragment : Fragment(), CoroutineScope {
+class TagFragment : TagContract.View, Fragment(), CoroutineScope {
+
+    override lateinit var presenter: TagContract.Presenter
+
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
 
@@ -36,7 +41,7 @@ class TagFragment : Fragment(), CoroutineScope {
 
     private var listener: OnFragmentInteractionListener? = null
 
-    private lateinit var tagAdapter: TagAdapter
+    override lateinit var tagAdapter: TagAdapter
     private val tagRepository by inject<TagRepository>()
 
     private lateinit var menu: Menu
@@ -90,154 +95,119 @@ class TagFragment : Fragment(), CoroutineScope {
         super.onViewCreated(view, savedInstanceState)
         setHasOptionsMenu(true)
 
+        presenter = inject<TagContract.Presenter>(
+            "", null
+        ) {
+            parametersOf(
+                this,
+                inject<TagRepository>().value
+            )
+        }.value
+        presenter.start()
+
         recycleView.setHasFixedSize(true)
         recycleView.layoutManager = LinearLayoutManager(this.context)
+
+        tagAdapter = TagAdapter(this, presenter)
+        tagAdapter.setHasStableIds(true)
+        recycleView.adapter = tagAdapter
+        notifyTagChanged()
+
         // 区切り線の表示
         recycleView.addItemDecoration(
             DividerItemDecoration(this.context, DividerItemDecoration.VERTICAL)
         )
 
-        launch(Dispatchers.IO) {
-            Logger.d("in IO onViewCreated")
-
-            viewTagList = tagRepository.getAll().toMutableList()
-
-            withContext(Dispatchers.Main) {
-                Logger.d("in withContext onViewCreated")
-                tagAdapter = object : TagAdapter(viewTagList) {
-                    override fun onColorSpinnerSelected(
-                        view: View?,
-                        id: Int,
-                        position: Int,
-                        holder: TagViewHolder
-                    ) {
-                        onSpinnerSelected(view, id, position, holder)
-                    }
-
-                    override fun onPatternSpinnerSelected(
-                        view: View?,
-                        id: Int,
-                        position: Int,
-                        holder: TagViewHolder
-                    ) {
-                        onSpinnerSelected(view, id, position, holder)
-                    }
-
-                    override fun onSpinnerSelected(
-                        v: View?,
-                        id: Int,
-                        position: Int,
-                        holder: TagViewHolder
-                    ) {
-                        Logger.d("スピナーA onItemSelected id = $id")
-                        val tag = getEditedTag(holder)
-                        launch(job + Dispatchers.IO) {
-                            Logger.d("in IO onSpinnerSelected ")
-
-                            tagRepository.save(tag)
-
-                            withContext(Dispatchers.Main) {
-                                Logger.d("in withContext onSpinnerSelected ")
-                                Logger.d("pos : " + holder.adapterPosition)
-                                Logger.d("tagColor =" + tag.color)
-                                Logger.d("tagPattern =" + tag.pattern)
-                                // タグ変更されたので描画やりなおし
-                                val colorResId = tag.color
-                                val patternResId = tag.pattern
-                                if (v != null) {
-                                    val drawable = TileDrawable.create(
-                                        v.context,
-                                        colorResId,
-                                        patternResId,
-                                        Shader.TileMode.REPEAT
-                                    )
-                                    holder.todoTag.setImageDrawable(drawable)
-                                }
-
-                            }
-                        }
-                    }
-
-                    override fun onTagNameClick(v: View?, holder: TagViewHolder) {
-                        openKeyboard(v)
-                    }
-
-                    override fun onTagNameEditorAction(
-                        v: TextView?,
-                        actionId: Int,
-                        holder: TagViewHolder
-                    ): Boolean {
-                        when (actionId) {
-                            EditorInfo.IME_ACTION_DONE -> {
-                                closeKeyboard(v)
-                                return true
-                            }
-                            else -> {
-                                return false
-                            }
-                        }
-                    }
-
-                    override fun onTagNameFocusChange(
-                        v: View?,
-                        hasFocus: Boolean,
-                        holder: TagViewHolder
-                    ): Boolean {
-                        if (hasFocus) {
-                            return holder.tagName.performClick()
-                        } else {
-                            val tag = getEditedTag(holder)
-                            launch(job + Dispatchers.IO) {
-                                Logger.d("in IO onTagNameFocusChange ")
-                                tagRepository.save(tag)
-                            }
-                            closeKeyboard(v)
-                            return true
-                        }
-                    }
-
-                    override fun onClickDelete(v: View?, holder: TagViewHolder) {
-                        launch(job + Dispatchers.IO) {
-                            // 実データセットからアイテムを削除
-                            tagRepository.delete(tagAdapter.items[holder.adapterPosition].id)
-                            Logger.d("delete : ${tagAdapter.items[holder.adapterPosition].id}")
-                            viewTagList.removeAt(holder.adapterPosition)
-                            withContext(Dispatchers.Main) {
-                                tagAdapter.notifyItemRemoved(holder.adapterPosition)
-                            }
-                        }
-                    }
-                }
-                tagAdapter.setHasStableIds(true)
-                recycleView.adapter = tagAdapter
-                tagAdapter.notifyDataSetChanged()
-            }
-        }
-
         fab.setOnSafeClickListener {
+            onClickFab(it)
+        }
+    }
 
-            launch(Dispatchers.IO) {
-                Logger.d("in IO setOnSafeClickListener ")
-                val count = tagRepository.count()
-                val tag =
-                    Tag(
-                        id = 0,
-                        tagName = "タグ${count + 1}",
-                        pattern = Const.tagPatternIdList[Random.nextInt(
-                            Const.tagPatternIdList.size)],
-                        color = Const.tagColorIdList[Random.nextInt(
-                            Const.tagColorIdList.size)]
-                    )
+    /**
+     * Fabをクリックしたときのイベント
+     *
+     * @param fab
+     */
+    private fun onClickFab(fab: FloatingActionButton?) {
+        presenter.addNewTag(fab)
+    }
 
-                val savedId = tagRepository.save(tag)
-                val savedTag = tagRepository.find(savedId)
-                withContext(Dispatchers.Main) {
-                    Logger.d("in withContext setOnSafeClickListener")
-                    if (savedTag != null) viewTagList.add(savedTag)
-                    tagAdapter.notifyItemInserted(tagAdapter.itemCount - 1)
-                }
+    internal fun onColorSpinnerSelected(
+        view: View?,
+        id: Int,
+        position: Int,
+        holder: TagAdapter.TagViewHolder
+    ) {
+        onSpinnerSelected(view, id, position, holder)
+    }
+
+    internal fun onPatternSpinnerSelected(
+        view: View?,
+        id: Int,
+        position: Int,
+        holder: TagAdapter.TagViewHolder
+    ) {
+        onSpinnerSelected(view, id, position, holder)
+    }
+
+    private fun onSpinnerSelected(
+        v: View?,
+        id: Int,
+        position: Int,
+        holder: TagAdapter.TagViewHolder
+    ) {
+        launch(job + Dispatchers.IO) {
+            Logger.d("in IO onSpinnerSelected $id")
+            presenter.fixTag(holder)
+            withContext(Dispatchers.Main) {
+                Logger.d("in withContext onSpinnerSelected ")
+
+                // タグ変更されたので描画やりなおし
+                tagDraw(v, presenter.getTagByPos(holder.adapterPosition), holder)
             }
         }
+    }
+
+    internal fun onTagNameClick(v: View?, holder: TagAdapter.TagViewHolder) {
+        openKeyboard(v)
+    }
+
+    internal fun onTagNameEditorAction(
+        v: TextView?,
+        actionId: Int,
+        holder: TagAdapter.TagViewHolder
+    ): Boolean {
+        when (actionId) {
+            EditorInfo.IME_ACTION_DONE -> {
+                closeKeyboard(v)
+                return true
+            }
+            else -> {
+                return false
+            }
+        }
+    }
+
+    internal fun onTagNameFocusChange(
+        v: View?,
+        hasFocus: Boolean,
+        holder: TagAdapter.TagViewHolder
+    ): Boolean {
+        if (hasFocus) {
+            return holder.tagName.performClick()
+        } else {
+            launch(job + Dispatchers.IO) {
+                Logger.d("in IO onContentFocusChange ")
+                presenter.fixTag(holder)
+            }
+
+            closeKeyboard(v)
+            return true
+        }
+    }
+
+    internal fun onClickDelete(v: View?, holder: TagAdapter.TagViewHolder) {
+        presenter.deleteTag(holder.adapterPosition)
     }
 
     private fun openKeyboard(view: View?) {
@@ -276,8 +246,33 @@ class TagFragment : Fragment(), CoroutineScope {
         cancel()
     }
 
+    override fun tagDraw(v: View?, tag: Tag, holder: TagAdapter.TagViewHolder) {
+        val colorResId = tag.color
+        val patternResId = tag.pattern
+        if (v != null) {
+            val drawable = TileDrawable.create(
+                v.context,
+                colorResId,
+                patternResId,
+                Shader.TileMode.REPEAT
+            )
+            holder.todoTag.setImageDrawable(drawable)
+        }
+    }
 
     interface OnFragmentInteractionListener {
         fun onFragmentInteraction(uri: Uri)
+    }
+
+    override fun notifyTagChanged() {
+        tagAdapter.notifyDataSetChanged()
+    }
+
+    override fun notifyTagDelete(pos: Int) {
+        tagAdapter.notifyItemRemoved(pos)
+    }
+
+    override fun notifyTagAdd() {
+        tagAdapter.notifyItemInserted(tagAdapter.itemCount - 1)
     }
 }

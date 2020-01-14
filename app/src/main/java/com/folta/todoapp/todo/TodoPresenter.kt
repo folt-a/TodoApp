@@ -123,7 +123,7 @@ class TodoPresenter(
                 todoRepos.findByDate(titleDate.toStringSlashyyyyMMdd()).toMutableList()
             withContext(Dispatchers.Main) {
                 Logger.d("in withContext onClickCalendarOptionMenu")
-                viewToDo.SetActionBarTitle(titleDate.toStringSlashyyyyMMdd())
+                viewToDo.setActionBarTitle(titleDate.toStringSlashyyyyMMdd())
                 viewToDo.notifyToDoChanged()
             }
         }

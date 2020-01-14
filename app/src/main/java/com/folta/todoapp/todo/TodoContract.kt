@@ -14,7 +14,7 @@ interface TodoContract {
 
         var todoAdapter: ToDoAdapter
         override var presenter: Presenter
-        fun SetActionBarTitle(title: String)
+        fun setActionBarTitle(title: String)
         fun tagDraw(v: android.view.View?, tag: Tag, holder: ToDoAdapter.ToDoViewHolder)
         fun notifyToDoChanged()
         fun notifyToDoDelete(pos: Int)

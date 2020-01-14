@@ -458,7 +458,7 @@ class ToDoListFragment : Fragment(),
         fun onFragmentInteraction(uri: Uri)
     }
 
-    override fun SetActionBarTitle(title: String) {
+    override fun setActionBarTitle(title: String) {
         (activity as MainActivity).setActionBarTitle(title)
     }
 

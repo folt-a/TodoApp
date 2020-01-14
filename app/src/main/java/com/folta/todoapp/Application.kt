@@ -5,6 +5,8 @@ import androidx.room.Room
 import com.folta.todoapp.data.local.*
 import com.folta.todoapp.setting.MemoOpen
 import com.folta.todoapp.setting.Pref
+import com.folta.todoapp.setting.tag.TagContract
+import com.folta.todoapp.setting.tag.TagPresenter
 import com.folta.todoapp.todo.TodoContract
 import com.folta.todoapp.todo.TodoPresenter
 import com.folta.todoapp.utility.Logger
@@ -20,6 +22,10 @@ import org.koin.dsl.module.module
 
 class Application : android.app.Application() {
     private val job = Job()
+
+    /**
+     * DIコンテナ Koin モジュール
+     */
     private val module: Module = module {
         single<ToDoRepository> { (ToDoRepositoryLocal()) }
         single<TagRepository> { (TagRepositoryLocal()) }
@@ -27,6 +33,12 @@ class Application : android.app.Application() {
             TodoPresenter(
                 view,
                 inject<ToDoRepository>().value,
+                inject<TagRepository>().value
+            )
+        }
+        factory<TagContract.Presenter> { (view: TagContract.View) ->
+            TagPresenter(
+                view,
                 inject<TagRepository>().value
             )
         }
@@ -38,7 +50,7 @@ class Application : android.app.Application() {
 //        起動初期処理
 //        ログ
         Logger.init()
-//        LocalDate
+//        LocalDateライブラリ初期化
         AndroidThreeTen.init(this)
 
 //        Koinコンテナ生成
@@ -48,20 +60,20 @@ class Application : android.app.Application() {
             )
         )
 
+        // ローカルデータベース初期化
         MyDataBase.db =
             Room.databaseBuilder(this.applicationContext, MyDataBase::class.java, "todo").build()
 
-        //        初回起動時のみ初期設定を行う
+        // 初回起動時のみ初期設定を行う
         if (!AppLaunchChecker.hasStartedFromLauncher(this)) {
             Logger.d("初回起動")
 
             CoroutineScope(Dispatchers.Main + job).launch {
-                //                Setting
+                // Setting
                 Pref(applicationContext).memoOpen = MemoOpen.OneLine
 //                デフォルトのタグを追加
                 val tagRepository by inject<TagRepository>()
                 tagRepository.init()
-
             }
         }
 
