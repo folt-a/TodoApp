@@ -84,7 +84,9 @@ class TodoPresenter(
             val savedTodo = todoRepos.find(savedId)
             if (savedTodo != null) viewToDoList.add(savedTodo)
 
-            viewToDo.notifyToDoAdd()
+            withContext(Dispatchers.Main) {
+                viewToDo.notifyToDoAdd()
+            }
         }
     }
 
@@ -161,7 +163,7 @@ class TodoPresenter(
 
         coroutineScope {
             launch(job + Dispatchers.IO) {
-                Logger.d("in IO onDoneCheck")
+                Logger.d("in IO fixToDo")
                 if (todo != null) todoRepos.save(todo)
             }
         }
@@ -171,7 +173,7 @@ class TodoPresenter(
     override fun changeTag(v: View?, holder: ToDoAdapter.ToDoViewHolder) {
         launch(job + Dispatchers.IO) {
             Logger.d("in IO onSpinnerSelected")
-            fixToDo(holder) ?: return@launch
+            fixToDo(holder)
 
             val tag = getTagByToDoPos(holder.adapterPosition)
 

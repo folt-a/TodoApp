@@ -29,7 +29,7 @@ class TagSpinnerAdapter(val presenter: TodoContract.Presenter) : BaseAdapter() {
         } else {
             holder = SelectedTagSpinnerViewHolder(convertView)
         }
-        Logger.i("POSITION:$position")
+        Logger.i("getView POSITION:$position")
         val tag: Tag = presenter.getTagByTagPos(position)
         holder.bind(tag)
         return holder.containerView
@@ -49,6 +49,7 @@ class TagSpinnerAdapter(val presenter: TodoContract.Presenter) : BaseAdapter() {
         } else {
             holder = TagSpinnerViewHolder(convertView)
         }
+        Logger.i("getDropDownView POSITION:$position")
         val tag: Tag = presenter.getTagByTagPos(position)
         holder.bind(tag)
         return holder.containerView

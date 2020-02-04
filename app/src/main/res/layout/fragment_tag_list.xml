@@ -1,24 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:context=".setting.tag.TagFragment"
+        xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/coordinatorLayout"
-        android:clickable="true"
-        android:focusableInTouchMode="true"
-        android:focusable="true"
-        >
-
-<androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycleView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingBottom="140dp"
-        android:clipToPadding="false"
-        />
+        android:clickable="true"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        tools:context=".setting.tag.TagFragment">
+
+    <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycleView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingBottom="140dp" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab"

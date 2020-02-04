@@ -21,6 +21,7 @@ import com.folta.todoapp.R
 import com.folta.todoapp.data.local.*
 import com.folta.todoapp.utility.toStringSlashyyyyMMdd
 import com.folta.todoapp.MainActivity
+import com.folta.todoapp.todo.adapter.TagSpinnerAdapter
 import com.folta.todoapp.utility.TileDrawable
 import com.folta.todoapp.utility.setOnSafeClickListener
 import com.folta.todoapp.todo.adapter.ToDoAdapter
@@ -168,10 +169,9 @@ class ToDoListFragment : Fragment(),
 
         (activity as MainActivity).setActionBarTitle(presenter.titleDate.toStringSlashyyyyMMdd())
 
-        recycleView.setHasFixedSize(true)
         recycleView.layoutManager = LinearLayoutManager(view.context)
 
-        todoAdapter = ToDoAdapter(this, presenter)
+        todoAdapter = ToDoAdapter(this, presenter, TagSpinnerAdapter(presenter))
         todoAdapter.setHasStableIds(true)
         recycleView.adapter = todoAdapter
         notifyToDoChanged()
@@ -473,4 +473,5 @@ class ToDoListFragment : Fragment(),
     override fun notifyToDoAdd() {
         todoAdapter.notifyItemInserted(todoAdapter.itemCount - 1)
     }
+
 }

@@ -105,7 +105,6 @@ class TagFragment : TagContract.View, Fragment(), CoroutineScope {
         }.value
         presenter.start()
 
-        recycleView.setHasFixedSize(true)
         recycleView.layoutManager = LinearLayoutManager(this.context)
 
         tagAdapter = TagAdapter(this, presenter)

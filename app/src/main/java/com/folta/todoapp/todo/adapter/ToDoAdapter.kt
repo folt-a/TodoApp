@@ -5,18 +5,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
-import android.widget.*
+import android.widget.AdapterView
 import androidx.recyclerview.widget.RecyclerView
 import com.folta.todoapp.R
 import com.folta.todoapp.todo.ToDoListFragment
 import com.folta.todoapp.todo.TodoContract
-import kotlinx.android.synthetic.main.holder_todo.*
+import com.folta.todoapp.utility.Logger
 import kotlinx.android.extensions.LayoutContainer
+import kotlinx.android.synthetic.main.holder_todo.*
 import kotlinx.android.synthetic.main.holder_todo.view.*
 
 open class ToDoAdapter(
     val fragment: ToDoListFragment,
-    val presenter: TodoContract.Presenter
+    val presenter: TodoContract.Presenter,
+    private val tagSpinnerAdapter: TagSpinnerAdapter
 ) : RecyclerView.Adapter<ToDoAdapter.ToDoViewHolder>() {
 
     enum class ListShowState {
@@ -34,10 +36,6 @@ open class ToDoAdapter(
             ListShowState.NORMAL -> holder.bindNormal()
         }
     }
-
-    //    tagSpinnerAdapterのレイアウトは全てのToDoで共通なのでToDoAdapter生成時に固定
-    private val tagSpinnerAdapter: TagSpinnerAdapter =
-        TagSpinnerAdapter(presenter)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ToDoViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
@@ -59,10 +57,14 @@ open class ToDoAdapter(
 
             title.setOnEditorActionListener { v, actionId, _ ->
                 when (actionId) {
-                    EditorInfo.IME_ACTION_DONE -> {
+                    EditorInfo.IME_ACTION_DONE,
+                    EditorInfo.IME_ACTION_NEXT -> {
                         fragment.onEditorDoneToDoTitle(v, holder)
                     }
-                    else -> throw RuntimeException()
+                    else -> {
+                        Logger.d(actionId.toString())
+                        return@setOnEditorActionListener true
+                    }
                 }
             }
 
@@ -105,7 +107,11 @@ open class ToDoAdapter(
 
             title.isEnabled = true
             title.setText(presenter.getTitle(this.adapterPosition))
+            Logger.d("++++++++++++++++++++++++++++++++++ToDoViewHolder")
+
+            tagSpinner.onItemSelectedListener = null
             tagSpinner.setSelection(presenter.getTagNoByToDoPos(this.adapterPosition), false)
+
             tagSpinner.onItemSelectedListener =
                 object : AdapterView.OnItemSelectedListener {
                     //Spinnerのドロップダウンアイテムが選択された時
@@ -115,12 +121,13 @@ open class ToDoAdapter(
                         position: Int,
                         id: Long
                     ) {
-                        fragment.onSpinnerSelectedToDoTag(view,this@ToDoViewHolder)
+                        fragment.onSpinnerSelectedToDoTag(view, this@ToDoViewHolder)
                     }
 
                     //Spinnerのドロップダウンアイテムが選択されなかった時
                     override fun onNothingSelected(parent: AdapterView<*>) {}
                 }
+
             content.fullText = presenter.getMemo(this.adapterPosition)
             content.closeMemo()
             detail.cornerRadius = itemView.context.resources.getDimensionPixelSize(R.dimen.dp40)
@@ -128,7 +135,7 @@ open class ToDoAdapter(
             detail.setIconTintResource(R.color.colorPrimaryDark)
             isDone.isEnabled = true
             isDone.setOnCheckedChangeListener { v, _ ->
-                fragment.onCheckToDoDone(v,this)
+                fragment.onCheckToDoDone(v, this)
             }
             isDone.isChecked = presenter.getChecked(this.adapterPosition)
         }
