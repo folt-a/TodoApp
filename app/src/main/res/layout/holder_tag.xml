@@ -1,101 +1,108 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/relativeLayout"
+        android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#ffffff"
-        android:paddingStart="0dp"
-        android:paddingTop="2dp"
-        android:paddingEnd="0dp"
-        android:paddingBottom="2dp">
+        android:orientation="vertical">
 
-    <ImageView
-            android:id="@+id/todoTag"
-            android:layout_width="24dp"
-            android:layout_height="0dp"
-            android:layout_margin="0dp"
-            android:background="@color/white"
-            android:foregroundGravity="left"
-            android:padding="0dp"
-            android:scaleType="centerCrop"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-    <EditText
-            android:id="@+id/tagName"
-            android:layout_width="0dp"
+    <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/relativeLayout"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="72dp"
-            android:autofillHints="no"
-            android:backgroundTint="#B2DFDB"
-            android:inputType="text"
-            android:textSize="18sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/todoTag"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:background="#ffffff"
+            android:paddingStart="0dp"
+            android:paddingTop="2dp"
+            android:paddingEnd="0dp"
+            android:paddingBottom="2dp">
 
-    <TextView
-            android:id="@+id/tagPatternLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:background="@color/zero"
-            android:gravity="center"
-            android:text="パターン"
-            android:textAlignment="center"
-            app:layout_constraintStart_toStartOf="@+id/tagName"
-            app:layout_constraintTop_toBottomOf="@+id/tagName" />
+        <ImageView
+                android:id="@+id/todoTag"
+                android:layout_width="24dp"
+                android:layout_height="0dp"
+                android:layout_margin="0dp"
+                android:background="@color/white"
+                android:foregroundGravity="left"
+                android:padding="0dp"
+                android:scaleType="centerCrop"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-    <Spinner
-            android:id="@+id/tagPatternSpinner"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:backgroundTint="@color/colorIcon"
-            app:layout_constraintBottom_toBottomOf="@+id/tagPatternLabel"
-            app:layout_constraintStart_toEndOf="@+id/tagPatternLabel"
-            app:layout_constraintTop_toTopOf="@+id/tagPatternLabel" />
+        <EditText
+                android:id="@+id/tagName"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="72dp"
+                android:autofillHints="no"
+                android:backgroundTint="#B2DFDB"
+                android:inputType="text"
+                android:textSize="18sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/todoTag"
+                app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-            android:id="@+id/tagColorLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:background="@color/zero"
-            android:gravity="center"
-            android:text="色"
-            app:layout_constraintBottom_toBottomOf="@+id/tagPatternSpinner"
-            app:layout_constraintStart_toEndOf="@+id/tagPatternSpinner"
-            app:layout_constraintTop_toTopOf="@+id/tagPatternSpinner" />
+        <TextView
+                android:id="@+id/tagPatternLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@color/zero"
+                android:gravity="center"
+                android:text="パターン"
+                android:textAlignment="center"
+                app:layout_constraintStart_toStartOf="@+id/tagName"
+                app:layout_constraintTop_toBottomOf="@+id/tagName" />
 
-    <Spinner
-            android:id="@+id/tagColorSpinner"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:backgroundTint="@color/colorIcon"
-            app:layout_constraintBottom_toBottomOf="@+id/tagColorLabel"
-            app:layout_constraintStart_toEndOf="@+id/tagColorLabel"
-            app:layout_constraintTop_toTopOf="@+id/tagColorLabel" />
+        <Spinner
+                android:id="@+id/tagPatternSpinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/colorIcon"
+                app:layout_constraintBottom_toBottomOf="@+id/tagPatternLabel"
+                app:layout_constraintStart_toEndOf="@+id/tagPatternLabel"
+                app:layout_constraintTop_toTopOf="@+id/tagPatternLabel" />
 
-    <com.google.android.material.button.MaterialButton
-            android:id="@+id/deleteButton"
-            style="@style/IconOnlyButton"
-            android:layout_width="48dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Button"
-            android:visibility="gone"
-            app:cornerRadius="12dp"
-            app:icon="@drawable/ic_trash"
-            app:iconTint="@color/alert"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:rippleColor="@color/gray" />
+        <TextView
+                android:id="@+id/tagColorLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:background="@color/zero"
+                android:gravity="center"
+                android:text="色"
+                app:layout_constraintBottom_toBottomOf="@+id/tagPatternSpinner"
+                app:layout_constraintStart_toEndOf="@+id/tagPatternSpinner"
+                app:layout_constraintTop_toTopOf="@+id/tagPatternSpinner" />
+
+        <Spinner
+                android:id="@+id/tagColorSpinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/colorIcon"
+                app:layout_constraintBottom_toBottomOf="@+id/tagColorLabel"
+                app:layout_constraintStart_toEndOf="@+id/tagColorLabel"
+                app:layout_constraintTop_toTopOf="@+id/tagColorLabel" />
+
+        <com.google.android.material.button.MaterialButton
+                android:id="@+id/deleteButton"
+                style="@style/IconOnlyButton"
+                android:layout_width="48dp"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="8dp"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Button"
+                android:visibility="gone"
+                app:cornerRadius="12dp"
+                app:icon="@drawable/ic_trash"
+                app:iconTint="@color/alert"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:rippleColor="@color/gray" />
 
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
+</LinearLayout>

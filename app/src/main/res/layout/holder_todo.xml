@@ -1,111 +1,121 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/relativeLayout"
+        android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
-        android:paddingStart="0dp"
-        android:paddingTop="2dp"
-        android:paddingEnd="0dp"
-        android:paddingBottom="2dp">
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:orientation="vertical">
 
-    <ImageView
-            android:id="@+id/todoTag"
-            android:layout_width="24dp"
-            android:layout_height="0dp"
-            android:layout_margin="0dp"
+    <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/relativeLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:background="@color/white"
-            android:foregroundGravity="left"
-            android:padding="0dp"
-            android:scaleType="centerCrop"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:paddingStart="0dp"
+            android:paddingTop="2dp"
+            android:paddingEnd="0dp"
+            android:paddingBottom="2dp">
 
-    <CheckBox
-            android:id="@+id/isDone"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:buttonTint="@color/colorAccent"
-            android:scaleX="1.4"
-            android:scaleY="1.4"
-            app:layout_constraintStart_toEndOf="@id/todoTag"
-            app:layout_constraintTop_toTopOf="parent" />
+        <ImageView
+                android:id="@+id/todoTag"
+                android:layout_width="24dp"
+                android:layout_height="0dp"
+                android:layout_margin="0dp"
+                android:background="@color/white"
+                android:foregroundGravity="left"
+                android:padding="0dp"
+                android:scaleType="centerCrop"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-    <EditText
-            android:id="@+id/title"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:autofillHints="no"
-            android:backgroundTint="@color/colorPrimaryDark"
-            android:hint="@string/ui_placeholder_title"
-            android:inputType="text"
-            android:textSize="18sp"
-            app:layout_constraintBottom_toBottomOf="@+id/isDone"
-            app:layout_constraintEnd_toStartOf="@+id/detail"
-            app:layout_constraintStart_toEndOf="@+id/isDone"
-            app:layout_constraintTop_toTopOf="@+id/isDone" />
+        <CheckBox
+                android:id="@+id/isDone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:buttonTint="@color/colorAccent"
+                android:scaleX="1.4"
+                android:scaleY="1.4"
+                app:layout_constraintStart_toEndOf="@id/todoTag"
+                app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-            android:id="@+id/tagTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:text="@string/holder_tag_text_view"
-            android:textSize="16sp"
-            android:visibility="gone"
-            app:layout_constraintStart_toEndOf="@id/todoTag"
-            app:layout_constraintTop_toBottomOf="@+id/isDone" />
+        <EditText
+                android:id="@+id/title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:autofillHints="no"
+                android:backgroundTint="@color/colorPrimaryDark"
+                android:hint="@string/ui_placeholder_title"
+                android:inputType="text"
+                android:textSize="18sp"
+                app:layout_constraintBottom_toBottomOf="@+id/isDone"
+                app:layout_constraintEnd_toStartOf="@+id/detail"
+                app:layout_constraintStart_toEndOf="@+id/isDone"
+                app:layout_constraintTop_toTopOf="@+id/isDone" />
 
-    <Spinner
-            android:id="@+id/tagSpinner"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:backgroundTint="@color/colorIcon"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="@+id/tagTextView"
-            app:layout_constraintStart_toEndOf="@id/tagTextView"
-            app:layout_constraintTop_toTopOf="@+id/tagTextView" />
+        <TextView
+                android:id="@+id/tagTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/holder_tag_text_view"
+                android:textSize="16sp"
+                android:visibility="gone"
+                app:layout_constraintStart_toEndOf="@id/todoTag"
+                app:layout_constraintTop_toBottomOf="@+id/isDone" />
 
-    <com.folta.todoapp.todo.EditTextMemo
-            android:id="@+id/content"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:background="@color/zero"
-            android:enabled="false"
-            android:focusable="false"
-            android:focusableInTouchMode="false"
-            android:hint="@string/ui_placeholder_memo"
-            android:inputType="textMultiLine"
-            android:textSize="10sp"
-            android:visibility="visible"
-            app:layout_constraintEnd_toEndOf="@+id/title"
-            app:layout_constraintStart_toEndOf="@id/todoTag"
-            app:layout_constraintTop_toBottomOf="@+id/tagTextView"
-            tools:layout_conversion_wrapHeight="43"
-            tools:layout_conversion_wrapWidth="1038" />
+        <Spinner
+                android:id="@+id/tagSpinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/colorIcon"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@+id/tagTextView"
+                app:layout_constraintStart_toEndOf="@id/tagTextView"
+                app:layout_constraintTop_toTopOf="@+id/tagTextView" />
 
-    <com.google.android.material.button.MaterialButton
-            android:id="@+id/detail"
-            style="@style/IconOnlyButton"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginRight="8dp"
-            android:padding="8dp"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Button"
-            app:cornerRadius="40dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:strokeWidth="1dp" />
+        <com.folta.todoapp.todo.EditTextMemo
+                android:id="@+id/content"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:background="@color/zero"
+                android:enabled="false"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:hint="@string/ui_placeholder_memo"
+                android:inputType="textMultiLine"
+                android:textSize="10sp"
+                android:visibility="visible"
+                app:layout_constraintEnd_toEndOf="@+id/title"
+                app:layout_constraintStart_toEndOf="@id/todoTag"
+                app:layout_constraintTop_toBottomOf="@+id/tagTextView"
+                tools:layout_conversion_wrapHeight="43"
+                tools:layout_conversion_wrapWidth="1038" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <com.google.android.material.button.MaterialButton
+                android:id="@+id/detail"
+                style="@style/IconOnlyButton"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginRight="8dp"
+                android:padding="8dp"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Button"
+                app:cornerRadius="40dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:strokeWidth="1dp" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</LinearLayout>
