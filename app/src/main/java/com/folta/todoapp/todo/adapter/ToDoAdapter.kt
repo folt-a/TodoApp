@@ -103,11 +103,10 @@ open class ToDoAdapter(
         fun bindNormal() {
             isShowDetail = false
 
-            presenter.changeTag(containerView, this)
+            fragment.tagDraw(containerView,presenter.getTagByToDoPos(this.adapterPosition),this)
 
             title.isEnabled = true
             title.setText(presenter.getTitle(this.adapterPosition))
-            Logger.d("++++++++++++++++++++++++++++++++++ToDoViewHolder")
 
             tagSpinner.onItemSelectedListener = null
             tagSpinner.setSelection(presenter.getTagNoByToDoPos(this.adapterPosition), false)
@@ -142,7 +141,7 @@ open class ToDoAdapter(
 
         fun bindDelete() {
             isShowDetail = false
-            presenter.changeTag(containerView, this)
+            fragment.tagDraw(containerView,presenter.getTagByToDoPos(this.adapterPosition),this)
             title.isEnabled = false
             title.setText(presenter.getTitle(this.adapterPosition))
             tagTextView.visibility = View.GONE
