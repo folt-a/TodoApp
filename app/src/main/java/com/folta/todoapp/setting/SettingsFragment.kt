@@ -1,4 +1,4 @@
-package com.folta.todoapp.view.ui.setting
+package com.folta.todoapp.setting
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -27,7 +27,7 @@ class SettingsFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_setting, container, false)
     }
 
-    class SettingsFragment(private val settingsFragment: com.folta.todoapp.view.ui.setting.SettingsFragment) :
+    class SettingsFragment(private val settingsFragment: com.folta.todoapp.setting.SettingsFragment) :
         PreferenceFragmentCompat() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey)

@@ -1,4 +1,4 @@
-package com.folta.todoapp.view.ui.setting
+package com.folta.todoapp.setting
 
 import android.content.Context
 import android.content.SharedPreferences

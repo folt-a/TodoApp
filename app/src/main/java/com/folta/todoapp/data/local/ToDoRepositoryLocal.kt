@@ -1,9 +1,12 @@
 package com.folta.todoapp.data.local
 
+import com.folta.todoapp.utility.Logger
+
 class ToDoRepositoryLocal : ToDoRepository {
     private val dao: ToDoDAO = MyDataBase.db.todoDAO()
 
     override suspend fun save(todo: ToDo): Int {
+        Logger.d(todo.tagId.toString())
         dao.upsert(todo)
         return dao.getNewestId()
     }

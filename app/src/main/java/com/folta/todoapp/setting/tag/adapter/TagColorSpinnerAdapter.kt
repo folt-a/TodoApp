@@ -1,4 +1,4 @@
-package com.folta.todoapp.view.ui.setting.tag
+package com.folta.todoapp.setting.tag.adapter
 
 import android.view.LayoutInflater
 import android.view.View
@@ -6,7 +6,6 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import androidx.core.content.ContextCompat
 import com.folta.todoapp.R
-import com.folta.todoapp.view.ui.setting.Pref
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.tag_color_spinner_item.*
 
